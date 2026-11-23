@@ -1,0 +1,793 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HYPER CARROM VIP</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d15;color:#f5e6c1;font-family:Arial,sans-serif}
+header{text-align:center;padding:17px;background:linear-gradient(120deg,#101827,#302315);border-bottom:2px solid #c9a14f}
+header h1{margin:0;color:#edcc7c;letter-spacing:3px;font-size:25px}
+header p{margin:6px 0 0;color:#b9aa8b;font-size:12px}
+button,select{border:1px solid #bd9549;border-radius:8px;padding:11px 14px;background:linear-gradient(135deg,#efd28a,#a9782e);color:#17120a;font-weight:bold;cursor:pointer}
+button:active{transform:scale(.97)}
+.top{display:flex;justify-content:center;flex-wrap:wrap;gap:9px;padding:13px}
+.panel{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:4px 10px 12px}
+.stat{background:#151e2c;border:1px solid #765d31;border-radius:9px;padding:10px 18px;min-width:105px;text-align:center}
+.stat small{display:block;color:#d8b76c;margin-bottom:5px}
+.stat strong{font-size:20px}
+.game{width:min(94vw,650px);margin:0 auto;background:#171b21;border:2px solid #c9a14f;border-radius:14px;padding:7px;box-shadow:0 12px 35px #0009}
+canvas{display:block;width:100%;height:auto;border-radius:7px;touch-action:none}
+.powerbox{width:min(94vw,450px);margin:13px auto;background:#151e2c;padding:12px;border-radius:9px}
+.powerbar{height:12px;background:#303642;border-radius:20px;overflow:hidden;margin-top:7px}
+#powerFill{height:100%;width:0;background:linear-gradient(90deg,#b17a2c,#ffe29a)}
+#message{text-align:center;color:#f0d18a;font-weight:bold;min-height:24px;padding:12px}
+.help{max-width:620px;margin:10px auto 25px;padding:15px;background:#131c29;border:1px solid #54452b;border-radius:10px;line-height:1.7;color:#d8ceb6;font-size:13px}
+.help h3{color:#e8c77a;margin:0 0 7px}
+footer{text-align:center;padding:18px;color:#777;font-size:12px}
+@media(max-width:450px){header h1{font-size:20px}.stat{min-width:90px;padding:8px}.top{gap:6px}button{padding:10px;font-size:12px}}
+
+.firebasePanel{max-width:650px;margin:14px auto;padding:14px;background:#151e2c;border:1px solid #c9a14f;border-radius:12px}
+.firebasePanel h2{margin:0 0 10px;text-align:center;color:#edcc7c;font-size:18px}
+.firebasePanel input{width:100%;padding:11px;margin:5px 0;border-radius:7px;border:1px solid #8e713e;background:#0b1220;color:#fff}
+.firebasePanel .firebaseButtons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.firebasePanel button{margin:2px}
+#onlineStatus{text-align:center;color:#f0d18a;font-size:13px;margin-top:9px;min-height:18px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>HYPER CARROM VIP</h1>
+<p>PREMIUM CARROM EXPERIENCE</p>
+</header>
+
+<section class="firebasePanel">
+<h2>HYPER ONLINE — FIREBASE</h2>
+<input id="email" type="email" placeholder="Email address" autocomplete="email">
+<input id="password" type="password" placeholder="Password (minimum 6 characters)" autocomplete="current-password">
+<div class="firebaseButtons">
+<button onclick="createAccount()">CREATE ACCOUNT</button>
+<button onclick="loginAccount()">LOGIN</button>
+<button onclick="logoutAccount()">LOGOUT</button>
+</div>
+<div class="firebaseButtons">
+<button onclick="createOnlineRoom()">CREATE ONLINE ROOM</button>
+<button onclick="joinOnlineRoom()">JOIN ROOM</button>
+</div>
+<div id="onlineStatus">Please create an account or login to play online.</div>
+</section>
+
+<div class="top">
+<select id="mode">
+<option value="computer">1 VS COMPUTER</option>
+<option value="local">1 VS 1 LOCAL</option>
+<option value="team">2 VS 2 TEAM</option>
+</select>
+<button onclick="startGame()">NEW MATCH</button>
+<button onclick="toggleSound()" id="soundBtn">SOUND ON</button>
+</div>
+
+<div class="panel">
+<div class="stat"><small>TEAM / PLAYER 1</small><strong id="s1">0</strong></div>
+<div class="stat"><small>TURN</small><strong id="turn">PLAYER 1</strong></div>
+<div class="stat"><small>TEAM / PLAYER 2</small><strong id="s2">0</strong></div>
+</div>
+
+<div class="game">
+<canvas id="board" width="600" height="600"></canvas>
+</div>
+
+<div class="powerbox">
+<div>SHOT POWER: <b id="powerText">0%</b></div>
+<div class="powerbar"><div id="powerFill"></div></div>
+</div>
+
+<div id="message">Welcome to HYPER CARROM VIP!</div>
+
+<div class="help">
+<h3>HOW TO PLAY</h3>
+1. Select a game mode and press NEW MATCH.<br>
+2. Move the striker left or right along your baseline.<br>
+3. Touch the striker and pull backwards to aim.<br>
+4. Release to shoot the coins into the pockets.<br>
+5. Pocket your coins to score points.<br>
+6. Pocket the Queen and then another coin to cover it.<br>
+7. Avoid pocketing the striker: it is a foul.
+</div>
+
+<footer>HYPER CARROM VIP © 2026</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script>
+"use strict";
+
+const canvas=document.getElementById("board");
+const ctx=canvas.getContext("2d");
+const W=600;
+const C=300;
+const pockets=[
+{x:54,y:54},{x:546,y:54},
+{x:54,y:546},{x:546,y:546}
+];
+
+let coins=[];
+let striker;
+let player=1;
+let scores=[0,0];
+let mode="computer";
+let dragging=false;
+let moving=false;
+let pointer=null;
+let gameEnded=false;
+let queenWaiting=0;
+let shotPocketed=0;
+let foul=false;
+let sound=true;
+let lastTime=0;
+let aiTimeout=null;
+let shotNumber=0;
+
+function say(t){
+ document.getElementById("message").textContent=t;
+}
+
+function beep(f=500){
+ if(!sound)return;
+ try{
+  const a=new AudioContext();
+  const o=a.createOscillator();
+  const g=a.createGain();
+  o.frequency.value=f;
+  g.gain.value=.04;
+  o.connect(g);g.connect(a.destination);
+  o.start();
+  o.stop(a.currentTime+.07);
+  o.onended=()=>a.close();
+ }catch(e){}
+}
+
+function toggleSound(){
+ sound=!sound;
+ document.getElementById("soundBtn").textContent=
+ sound?"SOUND ON":"SOUND OFF";
+}
+
+function piece(x,y,color,type="coin"){
+ return {
+  x,y,vx:0,vy:0,
+  r:type==="striker"?17:12,
+  color,type,active:true
+ };
+}
+
+function startGame(){
+ clearTimeout(aiTimeout);
+ mode=document.getElementById("mode").value;
+ coins=[];
+ scores=[0,0];
+ player=1;
+ dragging=false;
+ moving=false;
+ gameEnded=false;
+ queenWaiting=0;
+ shotPocketed=0;
+ foul=false;
+ shotNumber=0;
+
+ coins.push(piece(300,300,"queen","queen"));
+
+ for(let i=0;i<6;i++){
+  const a=i*Math.PI/3;
+  coins.push(piece(
+   300+Math.cos(a)*26,
+   300+Math.sin(a)*26,
+   i%2===0?"white":"black"
+  ));
+ }
+
+ for(let i=0;i<12;i++){
+  const a=i*Math.PI/6;
+  coins.push(piece(
+   300+Math.cos(a)*53,
+   300+Math.sin(a)*53,
+   i%2===0?"black":"white"
+  ));
+ }
+
+ makeStriker();
+ updateUI();
+ say("Player 1: Your turn. Aim and shoot!");
+ draw();
+}
+
+function makeStriker(){
+ striker=piece(
+  300,player===1?485:115,
+  "#d8ae58","striker"
+ );
+}
+
+function playerName(){
+ if(mode==="computer" && player===2)return "COMPUTER";
+ if(mode==="team")return player<=2?"TEAM 1":"TEAM 2";
+ return "PLAYER "+player;
+}
+
+function updateUI(){
+ document.getElementById("s1").textContent=scores[0];
+ document.getElementById("s2").textContent=scores[1];
+ document.getElementById("turn").textContent=playerName();
+}
+
+function boardDraw(){
+ const g=ctx.createLinearGradient(30,30,570,570);
+ g.addColorStop(0,"#e1b878");
+ g.addColorStop(.5,"#a66a35");
+ g.addColorStop(1,"#d5a15e");
+
+ ctx.fillStyle="#17120e";
+ ctx.fillRect(0,0,600,600);
+ ctx.fillStyle=g;
+ ctx.fillRect(25,25,550,550);
+
+ ctx.strokeStyle="#f4dba9";
+ ctx.lineWidth=7;
+ ctx.strokeRect(39,39,522,522);
+
+ ctx.strokeStyle="#71421e";
+ ctx.lineWidth=2;
+ ctx.strokeRect(51,51,498,498);
+
+ ctx.beginPath();
+ ctx.arc(300,300,80,0,Math.PI*2);
+ ctx.strokeStyle="#75441f";
+ ctx.lineWidth=3;
+ ctx.stroke();
+
+ ctx.beginPath();
+ ctx.arc(300,300,65,0,Math.PI*2);
+ ctx.stroke();
+
+ ctx.beginPath();
+ ctx.arc(300,300,9,0,Math.PI*2);
+ ctx.fillStyle="#75441f";
+ ctx.fill();
+
+ [115,485].forEach(y=>{
+  ctx.beginPath();
+  ctx.moveTo(145,y);
+  ctx.lineTo(455,y);
+  ctx.strokeStyle="#75451f";
+  ctx.lineWidth=3;
+  ctx.stroke();
+
+  [145,455].forEach(x=>{
+   ctx.beginPath();
+   ctx.arc(x,y,10,0,Math.PI*2);
+   ctx.stroke();
+  });
+ });
+
+ pockets.forEach(p=>{
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,24,0,Math.PI*2);
+  ctx.fillStyle="#090807";
+  ctx.fill();
+  ctx.strokeStyle="#d8b16c";
+  ctx.lineWidth=4;
+  ctx.stroke();
+ });
+}
+
+function drawPiece(p){
+ if(!p || !p.active)return;
+ ctx.save();
+
+ ctx.shadowColor="#0009";
+ ctx.shadowBlur=5;
+ ctx.shadowOffsetY=2;
+
+ const color=p.color==="queen"?"#d5a32f":
+ p.color==="white"?"#f5e8cf":
+ p.color==="black"?"#282321":"#d9ae57";
+
+ const g=ctx.createRadialGradient(
+  p.x-4,p.y-5,2,p.x,p.y,p.r
+ );
+ g.addColorStop(0,"#fff");
+ g.addColorStop(.25,color);
+ g.addColorStop(1,"#34251a");
+
+ ctx.beginPath();
+ ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ ctx.fillStyle=g;
+ ctx.fill();
+
+ ctx.shadowBlur=0;
+ ctx.strokeStyle=p.type==="striker"?"#fff0b2":"#77512b";
+ ctx.lineWidth=2;
+ ctx.stroke();
+
+ if(p.type==="queen"){
+  ctx.fillStyle="#fff1b4";
+  ctx.font="bold 12px Arial";
+  ctx.textAlign="center";
+  ctx.fillText("Q",p.x,p.y+4);
+ }
+
+ ctx.restore();
+}
+
+function draw(){
+ ctx.clearRect(0,0,W,W);
+ boardDraw();
+ coins.forEach(drawPiece);
+ drawPiece(striker);
+
+ if(dragging && pointer){
+  const dx=striker.x-pointer.x;
+  const dy=striker.y-pointer.y;
+  const d=Math.hypot(dx,dy);
+  const power=Math.min(100,d/1.3);
+
+  if(d>3){
+   ctx.beginPath();
+   ctx.moveTo(striker.x,striker.y);
+   ctx.lineTo(
+    striker.x-dx/Math.max(d,1)*Math.min(d,150),
+    striker.y-dy/Math.max(d,1)*Math.min(d,150)
+   );
+   ctx.strokeStyle="#fff5cc";
+   ctx.lineWidth=3;
+   ctx.setLineDash([7,5]);
+   ctx.stroke();
+   ctx.setLineDash([]);
+  }
+
+  document.getElementById("powerText").textContent=
+   Math.round(power)+"%";
+  document.getElementById("powerFill").style.width=
+   power+"%";
+ }
+}
+
+function pos(e){
+ const r=canvas.getBoundingClientRect();
+ return {
+  x:(e.clientX-r.left)*600/r.width,
+  y:(e.clientY-r.top)*600/r.height
+ };
+}
+
+canvas.addEventListener("pointerdown",e=>{
+ if(gameEnded || moving || !striker.active)return;
+ if(mode==="computer" && player===2)return;
+
+ const p=pos(e);
+ const d=Math.hypot(p.x-striker.x,p.y-striker.y);
+
+ if(d<38){
+  dragging=true;
+  pointer=p;
+  canvas.setPointerCapture(e.pointerId);
+ }else{
+  const baseline=player===1?485:115;
+  if(Math.abs(p.y-baseline)<35){
+   striker.x=Math.max(160,Math.min(440,p.x));
+   draw();
+  }
+ }
+ draw();
+});
+
+canvas.addEventListener("pointermove",e=>{
+ if(!dragging)return;
+ pointer=pos(e);
+ draw();
+});
+
+canvas.addEventListener("pointerup",()=>{
+ if(!dragging)return;
+ dragging=false;
+
+ const dx=striker.x-pointer.x;
+ const dy=striker.y-pointer.y;
+ const power=Math.hypot(dx,dy);
+
+ if(power>=8){
+  const speed=Math.min(power,150)/150*17;
+  striker.vx=dx/power*speed;
+  striker.vy=dy/power*speed;
+  moving=true;
+  shotPocketed=0;
+  foul=false;
+  shotNumber++;
+  lastTime=performance.now();
+  beep(650);
+  requestAnimationFrame(loop);
+ }else{
+  draw();
+ }
+ pointer=null;
+ document.getElementById("powerText").textContent="0%";
+ document.getElementById("powerFill").style.width="0%";
+});
+
+function activePieces(){
+ return [...coins,striker].filter(p=>p && p.active);
+}
+
+function pocketPiece(p){
+ p.active=false;
+ beep(350);
+
+ if(p.type==="striker"){
+  foul=true;
+  scores[player-1]=Math.max(0,scores[player-1]-1);
+  say("FOUL! Striker pocketed. -1 point");
+  return;
+ }
+
+ if(p.type==="queen"){
+  queenWaiting=player;
+  say("QUEEN POCKETED! Cover it with another coin!");
+  return;
+ }
+
+ const teamIndex=mode==="team"?
+  (player===1||player===2?0:1):player-1;
+
+ scores[teamIndex]++;
+ shotPocketed++;
+
+ if(queenWaiting===player){
+  scores[teamIndex]+=3;
+  queenWaiting=0;
+  say("QUEEN COVERED! +3 BONUS!");
+ }else{
+  say("COIN POCKETED! +1 POINT");
+ }
+ updateUI();
+}
+
+function physics(dt){
+ const factor=dt/16.67;
+ const friction=Math.pow(.986,factor);
+ const list=activePieces();
+
+ list.forEach(p=>{
+  p.x+=p.vx*factor;
+  p.y+=p.vy*factor;
+  p.vx*=friction;
+  p.vy*=friction;
+
+  if(Math.abs(p.vx)<.035)p.vx=0;
+  if(Math.abs(p.vy)<.035)p.vy=0;
+
+  if(p.x-p.r<48){
+   p.x=48+p.r;p.vx=Math.abs(p.vx)*.83;
+  }
+  if(p.x+p.r>552){
+   p.x=552-p.r;p.vx=-Math.abs(p.vx)*.83;
+  }
+  if(p.y-p.r<48){
+   p.y=48+p.r;p.vy=Math.abs(p.vy)*.83;
+  }
+  if(p.y+p.r>552){
+   p.y=552-p.r;p.vy=-Math.abs(p.vy)*.83;
+  }
+ });
+
+ for(let i=0;i<list.length;i++){
+  for(let j=i+1;j<list.length;j++){
+   const a=list[i],b=list[j];
+   const dx=b.x-a.x,dy=b.y-a.y;
+   const d=Math.hypot(dx,dy);
+   const min=a.r+b.r;
+
+   if(d<min && d>0){
+    const nx=dx/d,ny=dy/d;
+    const overlap=min-d;
+
+    a.x-=nx*overlap/2;
+    a.y-=ny*overlap/2;
+    b.x+=nx*overlap/2;
+    b.y+=ny*overlap/2;
+
+    const rel=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;
+    if(rel>0){
+     const impulse=rel*.92;
+     a.vx-=impulse*nx;
+     a.vy-=impulse*ny;
+     b.vx+=impulse*nx;
+     b.vy+=impulse*ny;
+    }
+   }
+  }
+ }
+
+ activePieces().forEach(p=>{
+  for(const pocket of pockets){
+   if(Math.hypot(p.x-pocket.x,p.y-pocket.y)<24){
+    pocketPiece(p);
+    break;
+   }
+  }
+ });
+}
+
+function isMoving(){
+ return activePieces().some(p=>
+  Math.abs(p.vx)>.04 || Math.abs(p.vy)>.04
+ );
+}
+
+function loop(t){
+ const dt=Math.min(t-lastTime,30);
+ lastTime=t;
+ physics(dt);
+ draw();
+
+ if(isMoving()){
+  requestAnimationFrame(loop);
+ }else{
+  moving=false;
+  finishTurn();
+ }
+}
+
+function finishTurn(){
+ if(!striker.active)makeStriker();
+
+ if(queenWaiting===player && shotPocketed===0){
+  const q=coins.find(p=>p.type==="queen");
+  if(q){
+   q.active=true;q.x=300;q.y=300;
+  }
+  queenWaiting=0;
+  say("Queen not covered. Returned to centre.");
+ }
+
+ if(coins.every(p=>!p.active)){
+  gameEnded=true;
+  const winner=scores[0]===scores[1]?
+   "MATCH DRAW!":scores[0]>scores[1]?
+   "TEAM / PLAYER 1 WINS!":"TEAM / PLAYER 2 WINS!";
+  say(winner);
+  return;
+ }
+
+ if(shotPocketed===0 || foul){
+  player=mode==="team"?
+   (player===4?1:player+1):
+   (player===1?2:1);
+ }
+
+ updateUI();
+
+ if(mode==="computer" && player===2){
+  say("Computer is taking its turn...");
+  aiTimeout=setTimeout(computerMove,900);
+ }else{
+  say(playerName()+": Your turn!");
+ }
+}
+
+function computerMove(){
+ if(gameEnded || moving)return;
+
+ const targets=coins.filter(p=>
+  p.active && p.type==="coin"
+ );
+
+ if(!targets.length){
+  player=1;updateUI();return;
+ }
+
+ const target=targets[
+  Math.floor(Math.random()*targets.length)
+ ];
+
+ striker.x=300;
+ striker.y=115;
+
+ const dx=target.x-striker.x;
+ const dy=target.y-striker.y;
+ const d=Math.hypot(dx,dy)||1;
+
+ striker.vx=dx/d*12;
+ striker.vy=dy/d*12;
+
+ moving=true;
+ lastTime=performance.now();
+ requestAnimationFrame(loop);
+}
+
+
+// FIREBASE ONLINE SYSTEM
+const firebaseConfig = {
+ apiKey: "AIzaSyBErAQ7NT4eL5hxF8QSOEu5SEPHPyYAIVw",
+ authDomain: "hyper-carrom-vip.firebaseapp.com",
+ databaseURL: "https://hyper-carrom-vip-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId: "hyper-carrom-vip",
+ storageBucket: "hyper-carrom-vip.firebasestorage.app",
+ messagingSenderId: "818597557283",
+ appId: "1:818597557283:web:c7254ee49e6b5464d36d96",
+ measurementId: "G-8ELNZK9FCV"
+};
+
+let fbAuth=null, fbDB=null, onlineRoom=null, onlineRoomRef=null;
+let myOnlinePlayer=0, onlineListener=null, applyingRemote=false;
+const onlineStatus=(message)=>{document.getElementById("onlineStatus").textContent=message;};
+
+try {
+ if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+ fbAuth=firebase.auth();
+ fbDB=firebase.database();
+ fbAuth.onAuthStateChanged(user=>{
+  onlineStatus(user ? "Logged in: "+user.email : "Please create an account or login to play online.");
+ });
+} catch(error) {
+ onlineStatus("Firebase setup error: "+error.message);
+}
+
+async function createAccount(){
+ try{
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  if(!email || password.length<6) return onlineStatus("Enter email and a password of at least 6 characters.");
+  await fbAuth.createUserWithEmailAndPassword(email,password);
+  onlineStatus("Account created and logged in successfully.");
+ }catch(e){onlineStatus(e.message);}
+}
+
+async function loginAccount(){
+ try{
+  const email=document.getElementById("email").value.trim();
+  const password=document.getElementById("password").value;
+  await fbAuth.signInWithEmailAndPassword(email,password);
+  onlineStatus("Login successful.");
+ }catch(e){onlineStatus(e.message);}
+}
+
+async function logoutAccount(){
+ try{
+  if(onlineListener && onlineRoomRef) onlineRoomRef.off("value",onlineListener);
+  onlineRoom=null;onlineRoomRef=null;myOnlinePlayer=0;onlineListener=null;
+  await fbAuth.signOut();
+  onlineStatus("Logged out.");
+ }catch(e){onlineStatus(e.message);}
+}
+
+function makeRoomCode(){
+ return String(Math.floor(100000+Math.random()*900000));
+}
+
+function getGameState(){
+ return {
+  coins:coins.map(p=>({...p})),
+  striker:striker?({...striker}):null,
+  player,scores,mode,gameEnded,queenWaiting,shotPocketed,foul,
+  updatedAt:Date.now()
+ };
+}
+
+function applyGameState(state){
+ if(!state || !state.coins || !state.striker)return;
+ applyingRemote=true;
+ coins=state.coins;
+ striker=state.striker;
+ player=state.player||1;
+ scores=state.scores||[0,0];
+ mode="local";
+ document.getElementById("mode").value="local";
+ gameEnded=!!state.gameEnded;
+ queenWaiting=state.queenWaiting||0;
+ shotPocketed=state.shotPocketed||0;
+ foul=!!state.foul;
+ moving=false;
+ dragging=false;
+ updateUI();
+ draw();
+ say("Online room: "+onlineRoom+" — "+(player===myOnlinePlayer?"Your turn":"Opponent's turn"));
+ applyingRemote=false;
+}
+
+async function publishGameState(){
+ if(!onlineRoomRef || applyingRemote || !fbAuth.currentUser)return;
+ try{
+  await onlineRoomRef.child("state").set(getGameState());
+ }catch(e){
+  onlineStatus("Could not sync game: "+e.message);
+ }
+}
+
+function listenToRoom(){
+ if(onlineListener && onlineRoomRef) onlineRoomRef.off("value",onlineListener);
+ onlineListener=snapshot=>{
+  const data=snapshot.val();
+  if(!data){
+   onlineStatus("Room was not found or was closed.");
+   return;
+  }
+  if(data.state)applyGameState(data.state);
+  onlineStatus("Connected to room "+onlineRoom+" — You are Player "+myOnlinePlayer);
+ };
+ onlineRoomRef.on("value",onlineListener);
+}
+
+async function createOnlineRoom(){
+ try{
+  if(!fbAuth.currentUser)return onlineStatus("First create an account or login.");
+  if(onlineRoomRef)onlineRoomRef.off();
+  onlineRoom=makeRoomCode();
+  myOnlinePlayer=1;
+  onlineRoomRef=fbDB.ref("carromRooms/"+onlineRoom);
+  mode="local";
+  document.getElementById("mode").value="local";
+  startGame();
+  await onlineRoomRef.set({
+   createdBy:fbAuth.currentUser.uid,
+   createdAt:Date.now(),
+   players:{player1:fbAuth.currentUser.uid},
+   state:getGameState()
+  });
+  listenToRoom();
+  onlineStatus("Room created! Code: "+onlineRoom+" — Share this code with Player 2.");
+  say("Online room "+onlineRoom+" created. Waiting for Player 2.");
+ }catch(e){
+  onlineStatus(e.message);
+ }
+}
+
+async function joinOnlineRoom(){
+ try{
+  if(!fbAuth.currentUser)return onlineStatus("First create an account or login.");
+  const code=prompt("Enter the 6-digit room code:");
+  if(!code)return;
+  if(!/^\d{6}$/.test(code))return onlineStatus("Room code must contain 6 digits.");
+  if(onlineRoomRef)onlineRoomRef.off();
+  onlineRoom=code;
+  myOnlinePlayer=2;
+  onlineRoomRef=fbDB.ref("carromRooms/"+onlineRoom);
+  const snap=await onlineRoomRef.once("value");
+  if(!snap.exists())return onlineStatus("Room not found. Check the code.");
+  const data=snap.val();
+  if(data.players && data.players.player2 && data.players.player2!==fbAuth.currentUser.uid)
+   return onlineStatus("This room already has two players.");
+  await onlineRoomRef.child("players/player2").set(fbAuth.currentUser.uid);
+  listenToRoom();
+  onlineStatus("Joined room "+onlineRoom+" as Player 2.");
+ }catch(e){
+  onlineStatus(e.message);
+ }
+}
+
+// Only the player whose turn it is can move the striker in online play.
+canvas.addEventListener("pointerdown",e=>{
+ if(onlineRoom && player!==myOnlinePlayer){
+  e.stopImmediatePropagation();
+  say("Wait for your turn.");
+ }
+},true);
+
+// Send the finished turn to the other player's device.
+const originalFinishTurn=finishTurn;
+finishTurn=function(){
+ originalFinishTurn();
+ if(onlineRoom)publishGameState();
+};
+
+document.getElementById("mode").addEventListener("change",()=>{
+ startGame();
+});
+
+startGame();
+</script>
+</body>
+</html>
