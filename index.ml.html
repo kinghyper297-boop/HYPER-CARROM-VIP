@@ -1,0 +1,1255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HYPER CARROM VIP</title>
+<style>
+*{box-sizing:border-box}
+:root{--gold:#f4c66e;--bg:#080e19;--panel:#142137;--muted:#a9b7ca}
+body{margin:0;background:radial-gradient(ellipse at top,#20334e,#080e19 65%);color:#fff;font-family:Arial,sans-serif;min-height:100vh}
+button,input{font:inherit}
+button{cursor:pointer}
+header{height:65px;padding:0 18px;display:flex;align-items:center;justify-content:space-between;background:#080e19;border-bottom:1px solid #ffffff20;position:sticky;top:0;z-index:4}
+.logo{font-weight:900;letter-spacing:2px;color:var(--gold);font-size:20px}
+.logo span{color:white}
+#accountStatus{font-size:12px;color:var(--muted)}
+main{max-width:1200px;margin:auto;padding:18px}
+.panel{background:linear-gradient(145deg,#192941,#101a2b);border:1px solid #ffffff1c;border-radius:16px;padding:17px;box-shadow:0 12px 35px #0005}
+h2{color:var(--gold);font-size:19px;margin:0 0 13px}
+p{line-height:1.55}
+.muted{font-size:12px;color:var(--muted);line-height:1.6}
+.hero{padding:30px;border:1px solid #d7a94c55;border-radius:18px;background:linear-gradient(120deg,#304764,#111b2c 75%);min-height:240px;display:flex;flex-direction:column;justify-content:center}
+.hero h1{font-size:clamp(30px,5vw,55px);color:var(--gold);margin:0}
+.hero p{max-width:650px;color:#d0d8e3}
+.homegrid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+.modes{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mode{background:#ffffff09;border:1px solid #ffffff20;color:white;padding:17px;border-radius:12px;text-align:left}
+.mode strong{display:block;margin-bottom:6px}
+.mode small{color:var(--muted)}
+.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:13px}
+.gold,.dark{border:0;border-radius:9px;padding:12px 17px;font-weight:800}
+.gold{background:linear-gradient(135deg,#ffe7a8,#c18a38);color:#241707}
+.dark{background:#293c56;color:white;border:1px solid #ffffff20}
+#gameScreen,#onlineScreen{display:none}
+.gamegrid{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;align-items:start}
+.boardframe{padding:11px;background:linear-gradient(145deg,#24344b,#101a2a);border:1px solid #d9b56c88;border-radius:17px;box-shadow:0 16px 45px #0009}
+#board{width:100%;height:auto;display:block;aspect-ratio:1;touch-action:none;border-radius:9px}
+.side{display:grid;gap:12px}
+.player{display:flex;justify-content:space-between;align-items:center;padding:12px;background:#ffffff09;border:1px solid #ffffff1b;border-radius:11px;margin-top:8px}
+.player.active{border-color:var(--gold);box-shadow:0 0 15px #e7b85b33}
+.score{font-size:20px;color:var(--gold);font-weight:900}
+#status{color:var(--gold);font-weight:bold;min-height:20px}
+input[type=range]{width:100%;accent-color:#e9b75c}
+input[type=email],input[type=password],input[type=text]{width:100%;padding:12px;border:1px solid #ffffff2b;background:#080f1c;color:white;border-radius:9px}
+.fieldstack{display:grid;gap:10px;max-width:430px}
+.side button{width:100%}
+#aimHelp{font-size:12px;color:#c1ccda;line-height:1.6;min-height:38px}
+#onlineStatus{font-size:12px;color:#c2cfdf;line-height:1.6;margin-top:10px}
+#roomCodeDisplay{color:var(--gold);font-weight:bold;margin-top:8px}
+#voiceStatus{font-size:12px;color:var(--muted);margin-top:8px}
+.footer{text-align:center;color:#718096;font-size:11px;padding:22px}
+@media(max-width:820px){.homegrid,.gamegrid{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.side .wide{grid-column:1/-1}}
+@media(max-width:500px){main{padding:10px}.side{grid-template-columns:1fr}.side .wide{grid-column:auto}.hero{padding:20px}header{padding:0 12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">HYPER <span>CARROM VIP</span></div>
+  <div id="accountStatus">Guest Player</div>
+</header>
+
+<main>
+<section id="homeScreen">
+  <div class="homegrid">
+    <div class="hero">
+      <h1>HYPER CARROM VIP</h1>
+      <p>Premium carrom experience with realistic-style board, smooth coin physics, match rules, online rooms and voice chat.</p>
+      <div class="btnrow">
+        <button class="gold" onclick="startGame('computer')">PLAY VS COMPUTER</button>
+        <button class="dark" onclick="startGame('local')">LOCAL 2 PLAYERS</button>
+      </div>
+    </div>
+    <div class="panel">
+      <h2>GAME MODES</h2>
+      <div class="modes">
+        <button class="mode" onclick="startGame('computer')"><strong>🤖 Computer</strong><small>Play against AI</small></button>
+        <button class="mode" onclick="startGame('local')"><strong>👥 Local Match</strong><small>Two players</small></button>
+        <button class="mode" onclick="showOnline()"><strong>🌐 Online Room</strong><small>Play with a friend</small></button>
+        <button class="mode" onclick="showOnline()"><strong>🎙 Voice Chat</strong><small>Online voice mode</small></button>
+      </div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:16px">
+    <h2>HOW TO PLAY</h2>
+    <p class="muted">Striker ko apni baseline par move karein. Striker se peeche ki taraf drag karke aim karein aur release karke shot lein. Apne colour ke coins pocket karein. Queen pocket karne ke baad apna coin pocket karke cover karein.</p>
+  </div>
+</section>
+
+<section id="gameScreen">
+  <div class="btnrow" style="margin:0 0 12px">
+    <button class="dark" onclick="goHome()">← HOME</button>
+    <button class="dark" onclick="resetMatch()">NEW MATCH</button>
+  </div>
+  <div class="gamegrid">
+    <div class="boardframe"><canvas id="board" width="800" height="800"></canvas></div>
+    <aside class="side">
+      <div class="panel wide">
+        <h2>MATCH STATUS</h2>
+        <div id="status">Player 1 turn</div>
+        <p id="aimHelp">Drag the striker backwards to aim, then release to shoot.</p>
+      </div>
+      <div class="panel">
+        <h2>PLAYERS</h2>
+        <div class="player active" id="p1box"><div><b id="p1name">Player 1</b><div class="muted">White coins</div></div><div class="score" id="score1">0</div></div>
+        <div class="player" id="p2box"><div><b id="p2name">Player 2</b><div class="muted">Black coins</div></div><div class="score" id="score2">0</div></div>
+      </div>
+      <div class="panel">
+        <h2>SHOT POWER <span id="powerText">60%</span></h2>
+        <input id="power" type="range" min="10" max="100" value="60" oninput="powerText.textContent=this.value+'%'">
+      </div>
+      <div class="panel game-controls wide">
+        <button class="gold" onclick="shootStriker()">SHOOT</button>
+        <button class="dark" onclick="centerStriker()" style="margin-top:8px">CENTER STRIKER</button>
+        <button class="dark" onclick="toggleAim()" style="margin-top:8px">AIM GUIDE: ON</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<section id="onlineScreen">
+  <div class="btnrow" style="margin:0 0 12px"><button class="dark" onclick="goHome()">← HOME</button></div>
+  <div class="panel">
+    <h2>FIREBASE ACCOUNT</h2>
+    <p class="muted">Create an account or sign in to use online rooms.</p>
+    <div class="fieldstack">
+      <input id="emailInput" type="email" placeholder="Email address">
+      <input id="passwordInput" type="password" placeholder="Password (at least 6 characters)">
+      <div class="btnrow">
+        <button class="gold" onclick="signUp()">CREATE ACCOUNT</button>
+        <button class="dark" onclick="signIn()">LOGIN</button>
+        <button class="dark" onclick="signOutUser()">LOGOUT</button>
+      </div>
+    </div>
+    <hr style="border-color:#ffffff20;margin:20px 0">
+    <h2>ONLINE ROOM</h2>
+    <div class="fieldstack">
+      <input id="roomInput" type="text" placeholder="Enter room code">
+      <div class="btnrow">
+        <button class="gold" onclick="createRoom()">CREATE ROOM</button>
+        <button class="dark" onclick="joinRoom()">JOIN ROOM</button>
+        <button class="dark" onclick="leaveRoom()">LEAVE ROOM</button>
+      </div>
+    </div>
+    <div id="onlineStatus">Please login first.</div>
+    <div id="roomCodeDisplay"></div>
+    <hr style="border-color:#ffffff20;margin:20px 0">
+    <h2>VOICE CHAT</h2>
+    <button class="gold" onclick="toggleVoice()">🎙 CONNECT / DISCONNECT VOICE</button>
+    <div id="voiceStatus">Voice is disconnected.</div>
+    <audio id="remoteAudio" autoplay playsinline></audio>
+  </div>
+</section>
+</main>
+<div class="footer">HYPER CARROM VIP • Game prototype</div>
+
+<script>
+// =====================================
+// HYPER CARROM VIP - GAME ENGINE
+// =====================================
+
+const canvas=document.getElementById("board");
+const ctx=canvas.getContext("2d");
+const SIZE=800;
+const pockets=[
+ {x:76,y:76},{x:724,y:76},
+ {x:76,y:724},{x:724,y:724}
+];
+const bounds={left:108,right:692,top:108,bottom:692};
+
+let pieces=[];
+let striker=null;
+let currentPlayer=1;
+let gameMode="local";
+let scores=[0,0];
+let moving=false;
+let aiming=false;
+let aimPoint=null;
+let aimVisible=true;
+let matchOver=false;
+let turnPocketed=false;
+let turnFoul=false;
+let queenPending=false;
+let queenOwner=0;
+let lastFrame=0;
+let frameHandle=null;
+let aiBusy=false;
+let onlineRoom=false;
+let applyingRemote=false;
+
+function piece(x,y,r,type){
+ return {x,y,vx:0,vy:0,r,type,active:true};
+}
+
+function createCoins(){
+ pieces=[];
+ pieces.push(piece(400,400,15,"queen"));
+
+ // Nine white and nine black coins, arranged in a compact center pattern.
+ const positions=[];
+ for(let ring=1;ring<=3;ring++){
+  const count=ring===1?6:ring===2?6:6;
+  for(let i=0;i<count;i++){
+   const angle=(Math.PI*2*i/count)+(ring%2)*Math.PI/6;
+   positions.push({
+    x:400+Math.cos(angle)*ring*29,
+    y:400+Math.sin(angle)*ring*29
+   });
+  }
+ }
+ positions.forEach((p,i)=>{
+  pieces.push(piece(p.x,p.y,14.5,i%2===0?"white":"black"));
+ });
+}
+
+function setStriker(){
+ striker=piece(400,currentPlayer===1?645:155,21,"striker");
+}
+
+function startGame(mode){
+ gameMode=mode;
+ onlineRoom=false;
+ document.getElementById("homeScreen").style.display="none";
+ document.getElementById("onlineScreen").style.display="none";
+ document.getElementById("gameScreen").style.display="block";
+ currentPlayer=1;
+ scores=[0,0];
+ matchOver=false;
+ queenPending=false;
+ queenOwner=0;
+ turnPocketed=false;
+ turnFoul=false;
+ aiBusy=false;
+ createCoins();
+ setStriker();
+ updateUI();
+ draw();
+}
+
+function goHome(){
+ if(frameHandle)cancelAnimationFrame(frameHandle);
+ moving=false;
+ aiming=false;
+ document.getElementById("gameScreen").style.display="none";
+ document.getElementById("onlineScreen").style.display="none";
+ document.getElementById("homeScreen").style.display="block";
+}
+
+function showOnline(){
+ document.getElementById("homeScreen").style.display="none";
+ document.getElementById("gameScreen").style.display="none";
+ document.getElementById("onlineScreen").style.display="block";
+}
+
+function resetMatch(){
+ if(onlineRoom&&typeof publishGameState==="function"){
+  alert("Online match reset host ke through karein.");
+  return;
+ }
+ startGame(gameMode);
+}
+
+function updateUI(){
+ document.getElementById("score1").textContent=scores[0];
+ document.getElementById("score2").textContent=scores[1];
+ document.getElementById("p1box").classList.toggle("active",currentPlayer===1);
+ document.getElementById("p2box").classList.toggle("active",currentPlayer===2);
+ document.getElementById("p1name").textContent=gameMode==="computer"?"YOU":"PLAYER 1";
+ document.getElementById("p2name").textContent=gameMode==="computer"?"COMPUTER":"PLAYER 2";
+ document.getElementById("status").textContent=matchOver?
+  (scores[0]===scores[1]?"MATCH DRAW":scores[0]>scores[1]?"PLAYER 1 WINS":"PLAYER 2 WINS"):
+  "PLAYER "+currentPlayer+" TURN";
+ document.getElementById("aimHelp").textContent=queenPending?
+  "Queen is waiting for cover. Pocket one of your own coins next.":
+  "Drag the striker backwards to aim, then release to shoot.";
+}
+
+function drawWood(){
+ const g=ctx.createLinearGradient(20,20,780,780);
+ g.addColorStop(0,"#f4d49c");
+ g.addColorStop(.5,"#bd8044");
+ g.addColorStop(1,"#75401e");
+ ctx.fillStyle=g;
+ ctx.fillRect(0,0,800,800);
+ for(let i=0;i<55;i++){
+  const y=20+i*14;
+  ctx.beginPath();
+  ctx.moveTo(0,y);
+  ctx.bezierCurveTo(200,y-5,520,y+5,800,y-3);
+  ctx.strokeStyle=i%2?"#fff4d51c":"#4a260d22";
+  ctx.lineWidth=2;
+  ctx.stroke();
+ }
+}
+
+function drawPocket(p){
+ ctx.save();
+ ctx.shadowColor="#000";
+ ctx.shadowBlur=12;
+ ctx.beginPath();
+ ctx.arc(p.x,p.y,39,0,Math.PI*2);
+ ctx.fillStyle="#432513";
+ ctx.fill();
+ ctx.shadowBlur=0;
+ const g=ctx.createRadialGradient(p.x-7,p.y-8,2,p.x,p.y,33);
+ g.addColorStop(0,"#111");
+ g.addColorStop(1,"#000");
+ ctx.beginPath();
+ ctx.arc(p.x,p.y,32,0,Math.PI*2);
+ ctx.fillStyle=g;
+ ctx.fill();
+ ctx.strokeStyle="#f6d59b";
+ ctx.lineWidth=5;
+ ctx.stroke();
+ ctx.restore();
+}
+
+function drawBoard(){
+ ctx.clearRect(0,0,800,800);
+ ctx.save();
+ ctx.shadowColor="#000a";
+ ctx.shadowBlur=24;
+ ctx.fillStyle="#60371c";
+ ctx.fillRect(18,18,764,764);
+ ctx.restore();
+
+ drawWood();
+
+ const edge=ctx.createLinearGradient(20,20,780,780);
+ edge.addColorStop(0,"#ffe6b0");
+ edge.addColorStop(.5,"#985c2b");
+ edge.addColorStop(1,"#f3cb83");
+ ctx.strokeStyle=edge;
+ ctx.lineWidth=20;
+ ctx.strokeRect(29,29,742,742);
+
+ const surface=ctx.createLinearGradient(80,80,720,720);
+ surface.addColorStop(0,"#f5e3c4");
+ surface.addColorStop(1,"#d7b47f");
+ ctx.fillStyle=surface;
+ ctx.fillRect(76,76,648,648);
+
+ for(let i=0;i<40;i++){
+  ctx.beginPath();
+  ctx.moveTo(85,100+i*15);
+  ctx.lineTo(715,100+i*15);
+  ctx.strokeStyle="#6d421c12";
+  ctx.lineWidth=1;
+  ctx.stroke();
+ }
+
+ ctx.strokeStyle="#9c292b";
+ ctx.lineWidth=4;
+ ctx.strokeRect(155,120,490,38);
+ ctx.strokeRect(155,642,490,38);
+ ctx.strokeRect(120,155,38,490);
+ ctx.strokeRect(642,155,38,490);
+
+ [205,595].forEach(x=>{
+  [139,661].forEach(y=>{
+   ctx.beginPath();
+   ctx.arc(x,y,15,0,Math.PI*2);
+   ctx.stroke();
+  });
+ });
+
+ ctx.beginPath();
+ ctx.arc(400,400,75,0,Math.PI*2);
+ ctx.stroke();
+ ctx.beginPath();
+ ctx.arc(400,400,12,0,Math.PI*2);
+ ctx.stroke();
+
+ ctx.save();
+ ctx.globalAlpha=.14;
+ ctx.fillStyle="#713b1c";
+ ctx.font="bold 24px Arial";
+ ctx.textAlign="center";
+ ctx.fillText("HYPER CARROM VIP",400,530);
+ ctx.restore();
+
+ pockets.forEach(drawPocket);
+}
+
+function drawPiece(p){
+ if(!p||!p.active)return;
+ ctx.save();
+
+ ctx.beginPath();
+ ctx.arc(p.x+3,p.y+5,p.r+1,0,Math.PI*2);
+ ctx.fillStyle="#0005";
+ ctx.fill();
+
+ const g=ctx.createRadialGradient(
+  p.x-p.r*.4,p.y-p.r*.4,2,p.x,p.y,p.r*1.3
+ );
+
+ if(p.type==="white"){
+  g.addColorStop(0,"#fff");
+  g.addColorStop(.55,"#e8e0ce");
+  g.addColorStop(1,"#918775");
+ }else if(p.type==="black"){
+  g.addColorStop(0,"#8993a2");
+  g.addColorStop(.4,"#303846");
+  g.addColorStop(1,"#070b12");
+ }else if(p.type==="queen"){
+  g.addColorStop(0,"#ff9b9b");
+  g.addColorStop(.45,"#e32b40");
+  g.addColorStop(1,"#700b1c");
+ }else{
+  g.addColorStop(0,"#fff0bc");
+  g.addColorStop(.4,"#e3ad48");
+  g.addColorStop(1,"#80501d");
+ }
+
+ ctx.beginPath();
+ ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ ctx.fillStyle=g;
+ ctx.fill();
+ ctx.strokeStyle=p.type==="black"?"#090d14":"#fff0c4";
+ ctx.lineWidth=2;
+ ctx.stroke();
+
+ ctx.beginPath();
+ ctx.arc(p.x,p.y,p.r*.68,0,Math.PI*2);
+ ctx.strokeStyle=p.type==="black"?"#d5dfed66":"#fff8e899";
+ ctx.lineWidth=1.4;
+ ctx.stroke();
+
+ ctx.beginPath();
+ ctx.arc(p.x-p.r*.3,p.y-p.r*.35,p.r*.16,0,Math.PI*2);
+ ctx.fillStyle="#ffffffaa";
+ ctx.fill();
+ ctx.restore();
+}
+
+function drawAim(){
+ if(!aimVisible||!aimPoint||!striker||moving)return;
+ const dx=striker.x-aimPoint.x;
+ const dy=striker.y-aimPoint.y;
+ const len=Math.hypot(dx,dy);
+ if(len<5)return;
+ ctx.save();
+ ctx.setLineDash([9,8]);
+ ctx.strokeStyle="#ffffffbb";
+ ctx.lineWidth=3;
+ ctx.beginPath();
+ ctx.moveTo(striker.x,striker.y);
+ ctx.lineTo(striker.x+dx/len*190,striker.y+dy/len*190);
+ ctx.stroke();
+ ctx.setLineDash([]);
+ ctx.restore();
+}
+
+function draw(){
+ drawBoard();
+ pieces.forEach(drawPiece);
+ drawPiece(striker);
+ drawAim();
+}
+
+function centerStriker(){
+ if(moving||matchOver||!striker)return;
+ striker.x=400;
+ striker.y=currentPlayer===1?645:155;
+ draw();
+}
+
+function toggleAim(){
+ aimVisible=!aimVisible;
+ const buttons=document.querySelectorAll(".game-controls button");
+ if(buttons[1])buttons[1].textContent="AIM GUIDE: "+(aimVisible?"ON":"OFF");
+ draw();
+}
+
+function getPointer(e){
+ const r=canvas.getBoundingClientRect();
+ return {x:(e.clientX-r.left)*800/r.width,y:(e.clientY-r.top)*800/r.height};
+}
+
+canvas.addEventListener("pointerdown",e=>{
+ if(moving||matchOver||aiBusy)return;
+ if(onlineRoom&&typeof canControlOnline==="function"&&!canControlOnline())return;
+ const pos=getPointer(e);
+ if(Math.hypot(pos.x-striker.x,pos.y-striker.y)<48){
+  aiming=true;
+  aimPoint=pos;
+  canvas.setPointerCapture(e.pointerId);
+ }else if(Math.abs(pos.y-striker.y)<55&&pos.x>175&&pos.x<625){
+  striker.x=Math.max(180,Math.min(620,pos.x));
+  draw();
+ }
+});
+
+canvas.addEventListener("pointermove",e=>{
+ if(!aiming)return;
+ aimPoint=getPointer(e);
+ draw();
+});
+
+canvas.addEventListener("pointerup",e=>{
+ if(!aiming)return;
+ aiming=false;
+ const end=getPointer(e);
+ const dx=striker.x-end.x;
+ const dy=striker.y-end.y;
+ const distance=Math.hypot(dx,dy);
+ if(distance>8)applyShot(dx,dy,distance);
+ else{aimPoint=null;draw();}
+});
+
+function shootStriker(){
+ if(moving||matchOver||aiBusy)return;
+ if(onlineRoom&&typeof canControlOnline==="function"&&!canControlOnline())return;
+ let target=aimPoint||{x:400,y:400};
+ let dx=striker.x-target.x;
+ let dy=striker.y-target.y;
+ if(Math.hypot(dx,dy)<5)dy=currentPlayer===1?-1:1;
+ applyShot(dx,dy,Math.hypot(dx,dy));
+}
+
+function applyShot(dx,dy,distance){
+ if(moving||matchOver)return;
+ const len=Math.hypot(dx,dy)||1;
+ const power=Number(document.getElementById("power").value)/100;
+ const speed=Math.min(17,Math.max(3,distance*.055))*power;
+ striker.vx=dx/len*speed;
+ striker.vy=dy/len*speed;
+ moving=true;
+ turnPocketed=false;
+ turnFoul=false;
+ aimPoint=null;
+ lastFrame=0;
+ frameHandle=requestAnimationFrame(gameLoop);
+}
+
+function gameLoop(t){
+ if(!moving)return;
+ if(!lastFrame)lastFrame=t;
+ const dt=Math.min((t-lastFrame)/16.667,2);
+ lastFrame=t;
+ for(let i=0;i<Math.ceil(dt);i++)physicsStep();
+ draw();
+
+ if(allStopped()){
+  moving=false;
+  finishTurn();
+  draw();
+  if(onlineRoom&&typeof publishGameState==="function")publishGameState();
+  return;
+ }
+ frameHandle=requestAnimationFrame(gameLoop);
+}
+
+function allStopped(){
+ return [...pieces,striker].every(p=>
+  !p.active||Math.hypot(p.vx,p.vy)<.12
+ );
+}
+
+function physicsStep(){
+ const all=[...pieces,striker];
+
+ all.forEach(p=>{
+  if(!p||!p.active)return;
+  p.x+=p.vx;
+  p.y+=p.vy;
+  p.vx*=.987;
+  p.vy*=.987;
+  if(Math.abs(p.vx)<.035)p.vx=0;
+  if(Math.abs(p.vy)<.035)p.vy=0;
+
+  if(p.x-p.r<bounds.left){p.x=bounds.left+p.r;p.vx=Math.abs(p.vx)*.78;}
+  if(p.x+p.r>bounds.right){p.x=bounds.right-p.r;p.vx=-Math.abs(p.vx)*.78;}
+  if(p.y-p.r<bounds.top){p.y=bounds.top+p.r;p.vy=Math.abs(p.vy)*.78;}
+  if(p.y+p.r>bounds.bottom){p.y=bounds.bottom-p.r;p.vy=-Math.abs(p.vy)*.78;}
+ });
+
+ // Circle collisions with restitution and overlap correction
+ for(let i=0;i<all.length;i++){
+  const a=all[i];
+  if(!a.active)continue;
+  for(let j=i+1;j<all.length;j++){
+   const b=all[j];
+   if(!b.active)continue;
+   let dx=b.x-a.x,dy=b.y-a.y;
+   let dist=Math.hypot(dx,dy);
+   const min=a.r+b.r;
+   if(dist<min&&dist>0){
+    const nx=dx/dist,ny=dy/dist;
+    const overlap=min-dist;
+    a.x-=nx*overlap*.5;a.y-=ny*overlap*.5;
+    b.x+=nx*overlap*.5;b.y+=ny*overlap*.5;
+    const rel=(b.vx-a.vx)*nx+(b.vy-a.vy)*ny;
+    if(rel<0){
+     const impulse=-(1.72*rel)/2;
+     a.vx-=impulse*nx;a.vy-=impulse*ny;
+     b.vx+=impulse*nx;b.vy+=impulse*ny;
+    }
+   }
+  }
+ }
+
+ pieces.forEach(p=>{
+  if(!p.active)return;
+  for(const hole of pockets){
+   if(Math.hypot(p.x-hole.x,p.y-hole.y)<34){
+    pocketCoin(p);
+    break;
+   }
+  }
+ });
+
+ for(const hole of pockets){
+  if(striker.active&&Math.hypot(striker.x-hole.x,striker.y-hole.y)<34){
+   striker.active=false;
+   turnFoul=true;
+   break;
+  }
+ }
+}
+
+function pocketCoin(p){
+ if(!p.active)return;
+ p.active=false;p.vx=0;p.vy=0;
+ turnPocketed=true;
+
+ const own=currentPlayer===1?"white":"black";
+
+ if(p.type==="queen"){
+  if(queenPending){
+   // Queen cannot be pocketed again before it is covered.
+   queenPending=false;
+  }
+  queenPending=true;
+  queenOwner=currentPlayer;
+  return;
+ }
+
+ if(p.type===own){
+  scores[currentPlayer-1]++;
+  if(queenPending&&queenOwner===currentPlayer){
+   queenPending=false;
+   scores[currentPlayer-1]+=3;
+  }
+ }else{
+  turnFoul=true;
+ }
+}
+
+function finishTurn(){
+ if(turnFoul){
+  scores[currentPlayer-1]=Math.max(0,scores[currentPlayer-1]-1);
+  if(queenPending&&queenOwner===currentPlayer){
+   queenPending=false;
+   queenOwner=0;
+  }
+ }
+
+ if(!striker.active){
+  striker.active=true;
+  striker.vx=0;striker.vy=0;
+ }
+
+ const remaining=pieces.filter(p=>p.active&&p.type!=="queen");
+ if(remaining.length===0){
+  matchOver=true;
+  updateUI();
+  return;
+ }
+
+ if(!turnPocketed||turnFoul){
+  currentPlayer=currentPlayer===1?2:1;
+ }
+
+ setStriker();
+ updateUI();
+
+ if(gameMode==="computer"&&currentPlayer===2&&!matchOver){
+  aiBusy=true;
+  setTimeout(computerMove,700);
+ }
+}
+
+function computerMove(){
+ if(matchOver||gameMode!=="computer")return;
+ const colourPieces=pieces.filter(p=>p.active&&p.type==="black");
+ if(!colourPieces.length){
+  aiBusy=false;
+  currentPlayer=1;
+  setStriker();
+  updateUI();
+  return;
+ }
+ const target=colourPieces[Math.floor(Math.random()*colourPieces.length)];
+ const dx=target.x-striker.x;
+ const dy=target.y-striker.y;
+ const len=Math.hypot(dx,dy)||1;
+ striker.vx=dx/len*8;
+ striker.vy=dy/len*8;
+ aiBusy=false;
+ moving=true;
+ turnPocketed=false;
+ turnFoul=false;
+ lastFrame=0;
+ frameHandle=requestAnimationFrame(gameLoop);
+}
+
+draw();
+</script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+<script>
+// ==========================================
+// FIREBASE INITIALIZATION
+// ==========================================
+
+const firebaseConfig={
+ apiKey:"AIzaSyBErAQ7NT4eL5hxF8QSOEu5SEPHPyYAIVw",
+ authDomain:"hyper-carrom-vip.firebaseapp.com",
+ databaseURL:"https://hyper-carrom-vip-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId:"hyper-carrom-vip",
+ storageBucket:"hyper-carrom-vip.firebasestorage.app",
+ messagingSenderId:"818597557283",
+ appId:"1:818597557283:web:c7254ee49e6b5464d36d96",
+ measurementId:"G-8ELNZK9FCV"
+};
+
+let auth=null;
+let db=null;
+let currentUser=null;
+let currentRoomCode=null;
+let roomRole=null;
+let roomRef=null;
+let roomStateListener=null;
+let shotListener=null;
+let syncTimer=null;
+let lastShotId="";
+let peer=null;
+let localVoice=null;
+let voiceListeners=[];
+let makingOffer=false;
+
+try{
+ if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);
+ auth=firebase.auth();
+ db=firebase.database();
+
+ auth.onAuthStateChanged(user=>{
+  currentUser=user;
+  document.getElementById("accountStatus").textContent=
+   user?user.email:"Guest Player";
+  document.getElementById("onlineStatus").textContent=
+   user?"Logged in: "+user.email:"Please login first.";
+ });
+}catch(e){
+ console.error(e);
+ document.getElementById("onlineStatus").textContent=
+  "Firebase initialization error: "+e.message;
+}
+
+// ==========================================
+// AUTHENTICATION
+// ==========================================
+
+function emailValue(){
+ return document.getElementById("emailInput").value.trim();
+}
+function passwordValue(){
+ return document.getElementById("passwordInput").value;
+}
+
+async function signUp(){
+ if(!auth)return alert("Firebase load nahi hua.");
+ const email=emailValue(),password=passwordValue();
+ if(!email||!password)return alert("Email aur password enter karein.");
+ if(password.length<6)return alert("Password kam az kam 6 characters ka hona chahiye.");
+ try{
+  await auth.createUserWithEmailAndPassword(email,password);
+  alert("Account create ho gaya.");
+ }catch(e){
+  alert("Account error: "+e.message);
+ }
+}
+
+async function signIn(){
+ if(!auth)return alert("Firebase load nahi hua.");
+ const email=emailValue(),password=passwordValue();
+ if(!email||!password)return alert("Email aur password enter karein.");
+ try{
+  await auth.signInWithEmailAndPassword(email,password);
+  alert("Login successful.");
+ }catch(e){
+  alert("Login error: "+e.message);
+ }
+}
+
+async function signOutUser(){
+ try{
+  await disconnectVoice();
+  if(currentRoomCode)await leaveRoom();
+  if(auth)await auth.signOut();
+ }catch(e){
+  alert(e.message);
+ }
+}
+
+// ==========================================
+// ROOM CREATION AND JOINING
+// ==========================================
+
+function randomRoomCode(){
+ return Math.random().toString(36).substring(2,8).toUpperCase();
+}
+
+function roomPath(code){
+ return db.ref("rooms/"+code);
+}
+
+function updateOnlineText(text){
+ document.getElementById("onlineStatus").textContent=text;
+}
+
+async function createRoom(){
+ if(!currentUser)return alert("Pehle login karein.");
+ if(!db)return alert("Firebase database available nahi.");
+
+ try{
+  let code=randomRoomCode();
+  let ref=roomPath(code);
+  let snap=await ref.once("value");
+  while(snap.exists()){
+   code=randomRoomCode();
+   ref=roomPath(code);
+   snap=await ref.once("value");
+  }
+
+  await ref.set({
+   host:currentUser.uid,
+   hostName:currentUser.email,
+   guest:null,
+   guestName:null,
+   status:"waiting",
+   createdAt:firebase.database.ServerValue.TIMESTAMP,
+   gameState:null,
+   shot:null
+  });
+
+  currentRoomCode=code;
+  roomRole="host";
+  roomRef=ref;
+
+  document.getElementById("roomInput").value=code;
+  document.getElementById("roomCodeDisplay").textContent="ROOM CODE: "+code;
+
+  startGame("online");
+  onlineRoom=true;
+  attachRoomListeners();
+  startStateSync();
+
+  updateOnlineText("Room created. Friend ko room code bhejein: "+code);
+ }catch(e){
+  alert("Room create error: "+e.message);
+ }
+}
+
+async function joinRoom(){
+ if(!currentUser)return alert("Pehle login karein.");
+ const code=document.getElementById("roomInput").value.trim().toUpperCase();
+ if(!code)return alert("Room code enter karein.");
+
+ try{
+  const ref=roomPath(code);
+  const snap=await ref.once("value");
+  if(!snap.exists())return alert("Room nahi mila.");
+
+  const room=snap.val();
+  if(room.host===currentUser.uid)return alert("Aap is room ke host hain.");
+  if(room.guest&&room.guest!==currentUser.uid)return alert("Room full hai.");
+
+  await ref.update({
+   guest:currentUser.uid,
+   guestName:currentUser.email,
+   status:"ready"
+  });
+
+  currentRoomCode=code;
+  roomRole="guest";
+  roomRef=ref;
+  onlineRoom=true;
+
+  document.getElementById("roomCodeDisplay").textContent="ROOM CODE: "+code;
+  document.getElementById("homeScreen").style.display="none";
+  document.getElementById("onlineScreen").style.display="none";
+  document.getElementById("gameScreen").style.display="block";
+
+  attachRoomListeners();
+  updateOnlineText("Joined room. Waiting for host game state...");
+ }catch(e){
+  alert("Join error: "+e.message);
+ }
+}
+
+function attachRoomListeners(){
+ if(!roomRef)return;
+
+ if(roomStateListener)roomStateListener.off();
+ if(shotListener)shotListener.off();
+
+ roomStateListener=roomRef.on("value",snap=>{
+  if(!snap.exists()){
+   updateOnlineText("Room closed.");
+   return;
+  }
+  const room=snap.val();
+  const guest=room.guestName||"Waiting for player";
+  updateOnlineText("Room "+currentRoomCode+" | Host: "+(room.hostName||"Host")+" | Guest: "+guest+" | "+room.status);
+  if(room.status==="ready"&&room.guest){
+   document.getElementById("aimHelp").textContent=
+    "Online match ready. Host is Player 1; guest is Player 2.";
+  }
+  if(roomRole==="guest"&&room.gameState){
+   applyRemoteState(room.gameState);
+  }
+ });
+
+ shotListener=roomRef.child("shot").on("value",snap=>{
+  if(roomRole!=="host"||!snap.exists())return;
+  const shot=snap.val();
+  if(!shot||shot.id===lastShotId)return;
+  lastShotId=shot.id;
+  if(shot.by!==currentUser.uid)return;
+  if(currentPlayer!==2||moving||matchOver)return;
+  originalApplyShot(shot.dx,shot.dy,shot.distance);
+ });
+}
+
+function canControlOnline(){
+ if(!onlineRoom)return true;
+ if(!currentUser||!roomRole)return false;
+ return (roomRole==="host"&&currentPlayer===1)||
+        (roomRole==="guest"&&currentPlayer===2);
+}
+
+// ==========================================
+// ONLINE SHOT REQUEST
+// ==========================================
+
+const originalApplyShot=applyShot;
+
+applyShot=function(dx,dy,distance){
+ if(!onlineRoom){
+  originalApplyShot(dx,dy,distance);
+  return;
+ }
+
+ if(!canControlOnline())return;
+
+ if(roomRole==="host"){
+  originalApplyShot(dx,dy,distance);
+ }else{
+  roomRef.child("shot").set({
+   id:currentUser.uid+"_"+Date.now()+"_"+Math.random().toString(16).slice(2),
+   by:currentUser.uid,
+   dx,dy,distance,
+   sentAt:firebase.database.ServerValue.TIMESTAMP
+  }).catch(e=>alert("Shot send error: "+e.message));
+ }
+};
+
+// ==========================================
+// HOST AUTHORITATIVE GAME STATE SYNC
+// ==========================================
+
+function startStateSync(){
+ if(syncTimer)clearInterval(syncTimer);
+ syncTimer=setInterval(()=>{
+  if(!onlineRoom||roomRole!=="host"||!roomRef||!currentUser)return;
+  if(moving||!matchOver)publishGameState();
+ },100);
+}
+
+async function publishGameState(){
+ if(!roomRef||roomRole!=="host"||!currentUser)return;
+ try{
+  const state={
+   currentPlayer,
+   scores,
+   matchOver,
+   queenPending,
+   queenOwner,
+   pieces:pieces.map(p=>({
+    x:p.x,y:p.y,vx:p.vx,vy:p.vy,r:p.r,
+    type:p.type,active:p.active
+   })),
+   striker:{
+    x:striker.x,y:striker.y,vx:striker.vx,vy:striker.vy,
+    r:striker.r,active:striker.active
+   },
+   updatedAt:Date.now()
+  };
+  await roomRef.child("gameState").set(state);
+ }catch(e){
+  console.error("Game sync:",e);
+ }
+}
+
+function applyRemoteState(s){
+ if(roomRole!=="guest"||!s)return;
+ applyingRemote=true;
+
+ currentPlayer=s.currentPlayer||1;
+ scores=s.scores||[0,0];
+ matchOver=!!s.matchOver;
+ queenPending=!!s.queenPending;
+ queenOwner=s.queenOwner||0;
+
+ if(Array.isArray(s.pieces)){
+  pieces=s.pieces.map(p=>({...p}));
+ }
+ if(s.striker){
+  striker={...s.striker};
+ }
+
+ moving=false;
+ updateUI();
+ draw();
+ applyingRemote=false;
+}
+
+// ==========================================
+// WEBRTC VOICE CHAT
+// ==========================================
+
+function voiceStatus(message){
+ document.getElementById("voiceStatus").textContent=message;
+}
+
+function addVoiceListener(ref,event,callback){
+ ref.on(event,callback);
+ voiceListeners.push({ref,event,callback});
+}
+
+function removeVoiceListeners(){
+ voiceListeners.forEach(x=>x.ref.off(x.event,x.callback));
+ voiceListeners=[];
+}
+
+function createPeer(){
+ if(peer)return peer;
+
+ peer=new RTCPeerConnection({
+  iceServers:[
+   {urls:"stun:stun.l.google.com:19302"},
+   {urls:"stun:stun1.l.google.com:19302"}
+  ]
+ });
+
+ peer.onicecandidate=event=>{
+  if(!event.candidate||!roomRef)return;
+  const path=roomRole==="host"?"hostCandidates":"guestCandidates";
+  roomRef.child("rtc/"+path).push(event.candidate.toJSON());
+ };
+
+ peer.ontrack=event=>{
+  const audio=document.getElementById("remoteAudio");
+  audio.srcObject=event.streams[0];
+  audio.play().catch(()=>{});
+  voiceStatus("Voice connected.");
+ };
+
+ peer.onconnectionstatechange=()=>{
+  voiceStatus("Voice connection: "+peer.connectionState);
+ };
+
+ if(localVoice){
+  localVoice.getTracks().forEach(track=>{
+   peer.addTrack(track,localVoice);
+  });
+ }
+ return peer;
+}
+
+async function startMicrophone(){
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+  throw new Error("Microphone ke liye HTTPS website ya supported browser zaroori hai.");
+ }
+ if(!localVoice){
+  localVoice=await navigator.mediaDevices.getUserMedia({audio:true});
+ }
+}
+
+async function addRemoteCandidates(path){
+ const ref=roomRef.child("rtc/"+path);
+ const callback=snap=>{
+  if(!peer||!snap.exists())return;
+  const c=snap.val();
+  peer.addIceCandidate(new RTCIceCandidate(c)).catch(e=>{
+   console.warn("ICE candidate:",e);
+  });
+ };
+ addVoiceListener(ref,"child_added",callback);
+}
+
+async function connectVoice(){
+ if(!currentUser||!currentRoomCode||!roomRef){
+  return alert("Pehle login karein aur online room join karein.");
+ }
+ if(!navigator.mediaDevices||!window.RTCPeerConnection){
+  return alert("Is browser mein WebRTC voice supported nahi.");
+ }
+
+ try{
+  await startMicrophone();
+  createPeer();
+
+  const rtc=roomRef.child("rtc");
+
+  if(roomRole==="host"){
+   await rtc.remove();
+   createPeer();
+   await addRemoteCandidates("guestCandidates");
+
+   const offer=await peer.createOffer();
+   await peer.setLocalDescription(offer);
+   await rtc.child("offer").set({
+    type:offer.type,
+    sdp:offer.sdp
+   });
+
+   const answerRef=rtc.child("answer");
+   const answerCallback=async snap=>{
+    if(!snap.exists()||!peer)return;
+    if(peer.currentRemoteDescription)return;
+    await peer.setRemoteDescription(new RTCSessionDescription(snap.val()));
+   };
+   addVoiceListener(answerRef,"value",answerCallback);
+   voiceStatus("Calling friend. Waiting for answer...");
+  }else{
+   await addRemoteCandidates("hostCandidates");
+
+   const offerRef=rtc.child("offer");
+   const offerCallback=async snap=>{
+    if(!snap.exists()||!peer||peer.currentRemoteDescription)return;
+    try{
+     await peer.setRemoteDescription(new RTCSessionDescription(snap.val()));
+     const answer=await peer.createAnswer();
+     await peer.setLocalDescription(answer);
+     await rtc.child("answer").set({
+      type:answer.type,
+      sdp:answer.sdp
+     });
+     voiceStatus("Voice answer sent. Connecting...");
+    }catch(e){
+     voiceStatus("Voice error: "+e.message);
+    }
+   };
+   addVoiceListener(offerRef,"value",offerCallback);
+   voiceStatus("Microphone ready. Waiting for host call...");
+  }
+ }catch(e){
+  voiceStatus("Voice error: "+e.message);
+  alert("Voice error: "+e.message);
+ }
+}
+
+async function disconnectVoice(){
+ removeVoiceListeners();
+
+ if(peer){
+  peer.ontrack=null;
+  peer.onicecandidate=null;
+  peer.close();
+  peer=null;
+ }
+
+ if(localVoice){
+  localVoice.getTracks().forEach(t=>t.stop());
+  localVoice=null;
+ }
+
+ const audio=document.getElementById("remoteAudio");
+ audio.srcObject=null;
+ voiceStatus("Voice disconnected.");
+}
+
+async function toggleVoice(){
+ if(peer||localVoice){
+  await disconnectVoice();
+ }else{
+  await connectVoice();
+ }
+}
+
+// ==========================================
+// LEAVE ROOM AND CLEANUP
+// ==========================================
+
+async function leaveRoom(){
+ if(!currentRoomCode||!currentUser||!roomRef)return;
+
+ await disconnectVoice();
+
+ if(syncTimer){
+  clearInterval(syncTimer);
+  syncTimer=null;
+ }
+
+ if(roomStateListener){
+  roomStateListener.off();
+  roomStateListener=null;
+ }
+ if(shotListener){
+  shotListener.off();
+  shotListener=null;
+ }
+
+ try{
+  const snap=await roomRef.once("value");
+  if(snap.exists()){
+   const room=snap.val();
+   if(room.host===currentUser.uid){
+    await roomRef.remove();
+   }else if(room.guest===currentUser.uid){
+    await roomRef.update({
+     guest:null,
+     guestName:null,
+     status:"waiting"
+    });
+   }
+  }
+ }catch(e){
+  console.error(e);
+ }
+
+ currentRoomCode=null;
+ roomRole=null;
+ roomRef=null;
+ onlineRoom=false;
+ updateOnlineText("You left the room.");
+ document.getElementById("roomCodeDisplay").textContent="";
+ goHome();
+}
+
+// ==========================================
+// FINAL INITIALIZATION
+// ==========================================
+
+draw();
+</script>
+</body>
+</html>
