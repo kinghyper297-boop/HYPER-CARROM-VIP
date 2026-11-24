@@ -1,0 +1,1478 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HYPER CARROM VIP 3D</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ background:#080e19;
+ color:white;
+ font-family:Arial,sans-serif;
+}
+header{
+ height:65px;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ padding:0 18px;
+ background:#080e19;
+ border-bottom:1px solid #ffffff20;
+}
+.logo{
+ color:#f4c66e;
+ font-size:21px;
+ font-weight:900;
+ letter-spacing:2px;
+}
+.logo span{color:white}
+#accountStatus{font-size:12px;color:#aab8ca}
+main{max-width:1250px;margin:auto;padding:15px}
+.panel{
+ background:linear-gradient(145deg,#1a2b43,#101a2b);
+ border:1px solid #ffffff20;
+ border-radius:15px;
+ padding:16px;
+ margin-bottom:14px;
+}
+h2{color:#f4c66e;font-size:18px;margin:0 0 12px}
+.hero{
+ padding:30px;
+ background:linear-gradient(120deg,#314b69,#111b2c);
+ border:1px solid #d9b45c66;
+ border-radius:18px;
+ margin-bottom:15px;
+}
+.hero h1{
+ color:#f4c66e;
+ font-size:clamp(28px,5vw,52px);
+ margin:0;
+}
+.hero p{color:#d0d9e5;line-height:1.6}
+button{
+ cursor:pointer;
+ border:0;
+ border-radius:9px;
+ padding:12px 16px;
+ font-weight:bold;
+}
+.gold{
+ background:linear-gradient(135deg,#ffe8ad,#c18b3b);
+ color:#241707;
+}
+.dark{
+ background:#293e59;
+ color:white;
+ border:1px solid #ffffff25;
+}
+.btnrow{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+#gameScreen,#onlineScreen{display:none}
+.gamegrid{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) 270px;
+ gap:15px;
+ align-items:start;
+}
+.boardframe{
+ background:linear-gradient(145deg,#293c55,#101a2a);
+ border:1px solid #d8b46c;
+ border-radius:17px;
+ padding:8px;
+ box-shadow:0 18px 45px #000a;
+}
+#game3d{
+ width:100%;
+ aspect-ratio:1;
+ display:block;
+ border-radius:10px;
+ overflow:hidden;
+ touch-action:none;
+}
+.side{display:grid;gap:12px}
+.player{
+ display:flex;
+ justify-content:space-between;
+ padding:12px;
+ background:#ffffff0b;
+ border:1px solid #ffffff20;
+ border-radius:10px;
+ margin-top:8px;
+}
+.player.active{border-color:#f4c66e}
+.score{color:#f4c66e;font-size:22px;font-weight:900}
+input{
+ width:100%;
+ padding:12px;
+ background:#091321;
+ color:white;
+ border:1px solid #ffffff30;
+ border-radius:8px;
+}
+input[type=range]{padding:0;accent-color:#f4c66e}
+#status{color:#f4c66e;font-weight:bold}
+.muted{font-size:12px;color:#aab8ca;line-height:1.6}
+.fieldstack{display:grid;gap:10px;max-width:420px}
+#onlineStatus,#voiceStatus{font-size:12px;color:#b9c8dc;margin-top:12px}
+.footer{text-align:center;color:#77869a;font-size:11px;padding:20px}
+@media(max-width:800px){
+ .gamegrid{grid-template-columns:1fr}
+ .side{grid-template-columns:1fr 1fr}
+ .wide{grid-column:1/-1}
+}
+@media(max-width:500px){
+ main{padding:8px}
+ .side{grid-template-columns:1fr}
+ .wide{grid-column:auto}
+ header{padding:0 10px}
+ .hero{padding:20px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">HYPER <span>CARROM VIP 3D</span></div>
+ <div id="accountStatus">Guest Player</div>
+</header>
+
+<main>
+
+<section id="homeScreen">
+
+ <div class="hero">
+  <h1>HYPER CARROM VIP</h1>
+  <p>3D Carrom Experience • Realistic Board • 3D Coins • Smooth Physics</p>
+  <div class="btnrow">
+   <button class="gold" onclick="startGame('computer')">PLAY VS COMPUTER</button>
+   <button class="dark" onclick="startGame('local')">2 PLAYER LOCAL</button>
+   <button class="dark" onclick="showOnline()">ONLINE ROOM</button>
+  </div>
+ </div>
+
+ <div class="panel">
+  <h2>3D GAME FEATURES</h2>
+  <p class="muted">
+   3D wooden board, raised frame, thick coins, striker,
+   perspective camera, lighting and shadows.
+  </p>
+ </div>
+
+</section>
+
+<section id="gameScreen">
+
+ <div class="btnrow" style="margin-bottom:12px">
+  <button class="dark" onclick="goHome()">← HOME</button>
+  <button class="dark" onclick="resetMatch()">NEW MATCH</button>
+ </div>
+
+ <div class="gamegrid">
+
+  <div class="boardframe">
+   <div id="game3d"></div>
+  </div>
+
+  <aside class="side">
+
+   <div class="panel wide">
+    <h2>MATCH STATUS</h2>
+    <div id="status">Player 1 Turn</div>
+    <p class="muted" id="aimHelp">
+     Striker ko peeche drag karein aur release karke shoot karein.
+    </p>
+   </div>
+
+   <div class="panel">
+    <h2>PLAYERS</h2>
+    <div class="player active" id="p1box">
+     <b id="p1name">PLAYER 1</b>
+     <span class="score" id="score1">0</span>
+    </div>
+    <div class="player" id="p2box">
+     <b id="p2name">PLAYER 2</b>
+     <span class="score" id="score2">0</span>
+    </div>
+   </div>
+
+   <div class="panel">
+    <h2>SHOT POWER</h2>
+    <input id="power" type="range" min="10" max="100" value="65">
+    <p class="muted" id="powerText">65%</p>
+   </div>
+
+   <div class="panel wide">
+    <button class="gold" style="width:100%" onclick="shootButton()">SHOOT</button>
+    <button class="dark" style="width:100%;margin-top:8px" onclick="centerStriker()">CENTER STRIKER</button>
+   </div>
+
+  </aside>
+
+ </div>
+</section>
+
+<section id="onlineScreen">
+
+ <div class="btnrow">
+  <button class="dark" onclick="goHome()">← HOME</button>
+ </div>
+
+ <div class="panel">
+  <h2>FIREBASE ACCOUNT</h2>
+
+  <div class="fieldstack">
+   <input id="emailInput" type="email" placeholder="Email address">
+   <input id="passwordInput" type="password" placeholder="Password">
+   <div class="btnrow">
+    <button class="gold" onclick="signUp()">CREATE ACCOUNT</button>
+    <button class="dark" onclick="signIn()">LOGIN</button>
+    <button class="dark" onclick="signOutUser()">LOGOUT</button>
+   </div>
+  </div>
+
+  <hr style="border-color:#ffffff25;margin:20px 0">
+
+  <h2>ONLINE ROOM</h2>
+
+  <div class="fieldstack">
+   <input id="roomInput" placeholder="Room code">
+   <div class="btnrow">
+    <button class="gold" onclick="createRoom()">CREATE ROOM</button>
+    <button class="dark" onclick="joinRoom()">JOIN ROOM</button>
+    <button class="dark" onclick="leaveRoom()">LEAVE ROOM</button>
+   </div>
+  </div>
+
+  <div id="onlineStatus">Login first.</div>
+  <div id="roomCodeDisplay" style="color:#f4c66e;margin-top:10px"></div>
+ </div>
+
+</section>
+
+</main>
+
+<div class="footer">HYPER CARROM VIP 3D • Three.js Game</div>
+
+<!-- THREE.JS 3D ENGINE -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+
+<script>
+// ======================================
+// HYPER CARROM VIP - 3D ENGINE
+// ======================================
+
+const holder=document.getElementById("game3d");
+
+let scene,camera,renderer;
+let boardGroup;
+let pieces=[];
+let striker=null;
+let currentPlayer=1;
+let gameMode="local";
+let scores=[0,0];
+let moving=false;
+let aiming=false;
+let aimPoint=null;
+let matchOver=false;
+let turnPocketed=false;
+let turnFoul=false;
+let queenPending=false;
+let queenOwner=0;
+let animationFrame=null;
+let lastTime=0;
+let aiBusy=false;
+
+const BOARD=8;
+const LIMIT=3.48;
+const POCKETS=[
+ [-3.48,-3.48],
+ [3.48,-3.48],
+ [-3.48,3.48],
+ [3.48,3.48]
+];
+
+const raycaster=new THREE.Raycaster();
+const pointer=new THREE.Vector2();
+const floorPlane=new THREE.Plane(
+ new THREE.Vector3(0,1,0),-.47
+);
+
+let pointerDown=false;
+
+function init3D(){
+
+ if(renderer)return;
+
+ scene=new THREE.Scene();
+ scene.background=new THREE.Color(0x101a2a);
+
+ camera=new THREE.PerspectiveCamera(
+  38,1,.1,100
+ );
+ camera.position.set(0,10.5,12.5);
+ camera.lookAt(0,0,0);
+
+ renderer=new THREE.WebGLRenderer({
+  antialias:true,
+  alpha:false
+ });
+
+ renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+ renderer.shadowMap.enabled=true;
+ renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ renderer.outputEncoding=THREE.sRGBEncoding;
+
+ holder.appendChild(renderer.domElement);
+
+ const ambient=new THREE.HemisphereLight(
+  0xffffff,0x5b3a20,1.25
+ );
+ scene.add(ambient);
+
+ const light=new THREE.DirectionalLight(
+  0xffe3b0,2
+ );
+ light.position.set(-4,9,6);
+ light.castShadow=true;
+ light.shadow.mapSize.set(2048,2048);
+ light.shadow.camera.left=-8;
+ light.shadow.camera.right=8;
+ light.shadow.camera.top=8;
+ light.shadow.camera.bottom=-8;
+ scene.add(light);
+
+ const fill=new THREE.PointLight(0xffffff,.5);
+ fill.position.set(4,5,-4);
+ scene.add(fill);
+
+ create3DBoard();
+ resize3D();
+
+ window.addEventListener("resize",resize3D);
+
+ renderer.domElement.addEventListener("pointerdown",onPointerDown);
+ renderer.domElement.addEventListener("pointermove",onPointerMove);
+ renderer.domElement.addEventListener("pointerup",onPointerUp);
+ renderer.domElement.addEventListener("pointercancel",onPointerUp);
+
+ animate3D();
+}
+
+function woodMaterial(color){
+ return new THREE.MeshStandardMaterial({
+  color:color,
+  roughness:.34,
+  metalness:.03
+ });
+}
+
+function box(x,y,z,sx,sy,sz,material,parent=scene){
+ const mesh=new THREE.Mesh(
+  new THREE.BoxGeometry(sx,sy,sz),
+  material
+ );
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
+
+function create3DBoard(){
+
+ boardGroup=new THREE.Group();
+ scene.add(boardGroup);
+
+ const darkWood=woodMaterial(0x593019);
+ const goldenWood=woodMaterial(0xb77a3d);
+ const surfaceMat=woodMaterial(0xe5c99b);
+ const redMat=new THREE.MeshStandardMaterial({
+  color:0x9e2525,
+  roughness:.55
+ });
+
+ // Board base
+ box(0,0,0,8.6,.48,8.6,darkWood,boardGroup);
+
+ // Raised wooden frame
+ box(0,.29,-4.05,8.4,.35,.3,goldenWood,boardGroup);
+ box(0,.29,4.05,8.4,.35,.3,goldenWood,boardGroup);
+ box(-4.05,.29,0,.3,.35,8.4,goldenWood,boardGroup);
+ box(4.05,.29,0,.3,.35,8.4,goldenWood,boardGroup);
+
+ // Playing surface
+ const surface=new THREE.Mesh(
+  new THREE.BoxGeometry(7.85,.12,7.85),
+  surfaceMat
+ );
+ surface.position.y=.3;
+ surface.receiveShadow=true;
+ boardGroup.add(surface);
+
+ // Corner pocket rings
+ const ringMat=new THREE.MeshStandardMaterial({
+  color:0x6b3c1c,
+  roughness:.4,
+  metalness:.12
+ });
+
+ POCKETS.forEach(([x,z])=>{
+  const ring=new THREE.Mesh(
+   new THREE.TorusGeometry(.39,.075,12,48),
+   ringMat
+  );
+  ring.rotation.x=Math.PI/2;
+  ring.position.set(x,.43,z);
+  boardGroup.add(ring);
+
+  const hole=new THREE.Mesh(
+   new THREE.CylinderGeometry(.34,.34,.08,40),
+   new THREE.MeshStandardMaterial({
+    color:0x080503,
+    roughness:1
+   })
+  );
+  hole.position.set(x,.25,z);
+  boardGroup.add(hole);
+ });
+
+ // Center circles
+ const circleMat=new THREE.MeshStandardMaterial({
+  color:0xa42d2b,
+  roughness:.65
+ });
+
+ function circle(radius){
+  const m=new THREE.Mesh(
+   new THREE.TorusGeometry(radius,.018,8,80),
+   circleMat
+  );
+  m.rotation.x=Math.PI/2;
+  m.position.y=.375;
+  boardGroup.add(m);
+ }
+
+ circle(1.05);
+ circle(.19);
+
+ // Baselines
+ const lineMat=new THREE.MeshStandardMaterial({
+  color:0xa42d2b
+ });
+
+ [-3.05,3.05].forEach(z=>{
+  box(0,.38,z,4.9,.015,.035,lineMat,boardGroup);
+ });
+
+ [-3.05,3.05].forEach(x=>{
+  box(x,.38,0,.035,.015,4.9,lineMat,boardGroup);
+ });
+
+ // Decorative corner marks
+ [-1,1].forEach(x=>{
+  [-1,1].forEach(z=>{
+   const mark=new THREE.Mesh(
+    new THREE.TorusGeometry(.15,.018,8,32),
+    circleMat
+   );
+   mark.rotation.x=Math.PI/2;
+   mark.position.set(x*2.65,.39,z*2.65);
+   boardGroup.add(mark);
+  });
+ });
+
+ // Floor below board
+ const floor=new THREE.Mesh(
+  new THREE.PlaneGeometry(200,200),
+  new THREE.MeshStandardMaterial({
+   color:0x101b2b,
+   roughness:.9
+  })
+ );
+ floor.rotation.x=-Math.PI/2;
+ floor.position.y=-.28;
+ floor.receiveShadow=true;
+ scene.add(floor);
+}
+
+function makeCoin(x,z,type){
+
+ const colors={
+  white:0xf3e9d3,
+  black:0x222936,
+  queen:0xd6273c,
+  striker:0xe2ad4e
+ };
+
+ const material=new THREE.MeshStandardMaterial({
+  color:colors[type],
+  roughness:.25,
+  metalness:type==="striker"?.22:.08
+ });
+
+ const group=new THREE.Group();
+
+ const coin=new THREE.Mesh(
+  new THREE.CylinderGeometry(
+   type==="striker"?.25:.19,
+   type==="striker"?.25:.19,
+   type==="striker"?.22:.16,
+   48
+  ),
+  material
+ );
+
+ coin.castShadow=true;
+ coin.receiveShadow=true;
+ group.add(coin);
+
+ const top=new THREE.Mesh(
+  new THREE.TorusGeometry(
+   type==="striker"?.17:.125,
+   .018,8,40
+  ),
+  new THREE.MeshStandardMaterial({
+   color:type==="black"?0xaab4c3:0xffffff,
+   metalness:.25,
+   roughness:.25
+  })
+ );
+
+ top.rotation.x=Math.PI/2;
+ top.position.y=type==="striker"?.115:.085;
+ group.add(top);
+
+ group.position.set(x,.48,z);
+ scene.add(group);
+
+ return {
+  x,z,vx:0,vz:0,
+  type,
+  active:true,
+  mesh:group,
+  radius:type==="striker"?.25:.19
+ };
+}
+
+function createCoins(){
+
+ pieces.forEach(p=>scene.remove(p.mesh));
+ pieces=[];
+ if(striker)scene.remove(striker.mesh);
+
+ // Queen
+ pieces.push(makeCoin(0,0,"queen"));
+
+ // 18 coins
+ for(let i=0;i<18;i++){
+
+  const ring=i<6?1:i<12?2:3;
+  const index=i%6;
+
+  const angle=index*Math.PI/3+(ring%2)*.2;
+  const distance=ring*.34;
+
+  const x=Math.cos(angle)*distance;
+  const z=Math.sin(angle)*distance;
+
+  pieces.push(
+   makeCoin(
+    x,z,
+    i%2===0?"white":"black"
+   )
+  );
+ }
+
+ setStriker();
+}
+
+function setStriker(){
+ if(striker)scene.remove(striker.mesh);
+
+ striker=makeCoin(
+  0,
+  currentPlayer===1?3.05:-3.05,
+  "striker"
+ );
+}
+
+function startGame(mode){
+
+ init3D();
+
+ gameMode=mode;
+ currentPlayer=1;
+ scores=[0,0];
+ moving=false;
+ aiming=false;
+ matchOver=false;
+ aiBusy=false;
+ queenPending=false;
+ queenOwner=0;
+
+ createCoins();
+ updateUI();
+
+ document.getElementById("homeScreen").style.display="none";
+ document.getElementById("onlineScreen").style.display="none";
+ document.getElementById("gameScreen").style.display="block";
+
+ resize3D();
+}
+
+function goHome(){
+
+ moving=false;
+ aiming=false;
+ aiBusy=false;
+
+ document.getElementById("gameScreen").style.display="none";
+ document.getElementById("onlineScreen").style.display="none";
+ document.getElementById("homeScreen").style.display="block";
+}
+
+function showOnline(){
+ document.getElementById("homeScreen").style.display="none";
+ document.getElementById("gameScreen").style.display="none";
+ document.getElementById("onlineScreen").style.display="block";
+}
+
+function resetMatch(){
+ if(onlineRoom){
+  alert("Online match reset ko host ke control se karna hoga.");
+  return;
+ }
+ startGame(gameMode);
+}
+
+function updateUI(){
+
+ document.getElementById("score1").textContent=scores[0];
+ document.getElementById("score2").textContent=scores[1];
+
+ document.getElementById("p1box").classList.toggle(
+  "active",currentPlayer===1
+ );
+ document.getElementById("p2box").classList.toggle(
+  "active",currentPlayer===2
+ );
+
+ document.getElementById("p1name").textContent=
+  gameMode==="computer"?"YOU":"PLAYER 1";
+
+ document.getElementById("p2name").textContent=
+  gameMode==="computer"?"COMPUTER":"PLAYER 2";
+
+ document.getElementById("status").textContent=
+  matchOver?
+   (scores[0]===scores[1]?"MATCH DRAW":
+    scores[0]>scores[1]?"PLAYER 1 WINS":"PLAYER 2 WINS"):
+   "PLAYER "+currentPlayer+" TURN";
+
+ document.getElementById("aimHelp").textContent=
+  queenPending?
+   "Queen cover ke liye apna coin pocket karein.":
+   "Striker ko peeche drag karein aur release karein.";
+}
+
+function resize3D(){
+
+ if(!renderer||!camera)return;
+
+ const width=holder.clientWidth;
+ const height=holder.clientHeight;
+
+ if(!width||!height)return;
+
+ renderer.setSize(width,height,false);
+ camera.aspect=width/height;
+ camera.updateProjectionMatrix();
+}
+
+function animate3D(){
+
+ animationFrame=requestAnimationFrame(animate3D);
+
+ if(moving){
+  const now=performance.now();
+  const dt=lastTime?Math.min((now-lastTime)/16.67,2):1;
+  lastTime=now;
+
+  for(let i=0;i<Math.ceil(dt);i++){
+   physicsStep();
+  }
+
+  if(allStopped()){
+   moving=false;
+   lastTime=0;
+   finishTurn();
+  }
+ }
+
+ if(renderer&&scene&&camera){
+  renderer.render(scene,camera);
+ }
+}
+
+function allStopped(){
+ return [...pieces,striker].every(p=>
+  !p.active||Math.hypot(p.vx,p.vz)<.09
+ );
+}
+
+function physicsStep(){
+
+ const all=[...pieces,striker];
+
+ all.forEach(p=>{
+
+  if(!p.active)return;
+
+  p.x+=p.vx;
+  p.z+=p.vz;
+
+  p.vx*=.986;
+  p.vz*=.986;
+
+  if(Math.abs(p.vx)<.025)p.vx=0;
+  if(Math.abs(p.vz)<.025)p.vz=0;
+
+  // Board boundary
+  if(p.x-p.radius< -LIMIT){
+   p.x=-LIMIT+p.radius;
+   p.vx=Math.abs(p.vx)*.78;
+  }
+
+  if(p.x+p.radius>LIMIT){
+   p.x=LIMIT-p.radius;
+   p.vx=-Math.abs(p.vx)*.78;
+  }
+
+  if(p.z-p.radius< -LIMIT){
+   p.z=-LIMIT+p.radius;
+   p.vz=Math.abs(p.vz)*.78;
+  }
+
+  if(p.z+p.radius>LIMIT){
+   p.z=LIMIT-p.radius;
+   p.vz=-Math.abs(p.vz)*.78;
+  }
+
+  p.mesh.position.x=p.x;
+  p.mesh.position.z=p.z;
+ });
+
+ // Coin collisions
+ for(let i=0;i<all.length;i++){
+
+  const a=all[i];
+  if(!a.active)continue;
+
+  for(let j=i+1;j<all.length;j++){
+
+   const b=all[j];
+   if(!b.active)continue;
+
+   const dx=b.x-a.x;
+   const dz=b.z-a.z;
+   const dist=Math.hypot(dx,dz);
+   const min=a.radius+b.radius;
+
+   if(dist<min&&dist>.0001){
+
+    const nx=dx/dist;
+    const nz=dz/dist;
+    const overlap=min-dist;
+
+    a.x-=nx*overlap*.5;
+    a.z-=nz*overlap*.5;
+    b.x+=nx*overlap*.5;
+    b.z+=nz*overlap*.5;
+
+    const rel=(b.vx-a.vx)*nx+(b.vz-a.vz)*nz;
+
+    if(rel<0){
+     const impulse=-(1.75*rel)/2;
+     a.vx-=impulse*nx;
+     a.vz-=impulse*nz;
+     b.vx+=impulse*nx;
+     b.vz+=impulse*nz;
+    }
+
+    a.mesh.position.set(a.x,.48,a.z);
+    b.mesh.position.set(b.x,.48,b.z);
+   }
+  }
+ }
+
+ // Pockets
+ pieces.forEach(p=>{
+
+  if(!p.active)return;
+
+  for(const hole of POCKETS){
+
+   if(Math.hypot(p.x-hole[0],p.z-hole[1])<.38){
+    pocketCoin(p);
+    break;
+   }
+  }
+ });
+
+ if(striker.active){
+
+  for(const hole of POCKETS){
+
+   if(Math.hypot(striker.x-hole[0],striker.z-hole[1])<.38){
+
+    striker.active=false;
+    scene.remove(striker.mesh);
+    turnFoul=true;
+    break;
+   }
+  }
+ }
+}
+
+function pocketCoin(p){
+
+ if(!p.active)return;
+
+ p.active=false;
+ p.vx=0;
+ p.vz=0;
+ scene.remove(p.mesh);
+
+ turnPocketed=true;
+
+ if(p.type==="queen"){
+  queenPending=true;
+  queenOwner=currentPlayer;
+  return;
+ }
+
+ const own=currentPlayer===1?"white":"black";
+
+ if(p.type===own){
+
+  scores[currentPlayer-1]++;
+
+  if(queenPending&&queenOwner===currentPlayer){
+   queenPending=false;
+   scores[currentPlayer-1]+=3;
+  }
+
+ }else{
+  turnFoul=true;
+ }
+}
+
+function finishTurn(){
+
+ if(turnFoul){
+
+  scores[currentPlayer-1]=Math.max(
+   0,scores[currentPlayer-1]-1
+  );
+
+  if(queenPending&&queenOwner===currentPlayer){
+   queenPending=false;
+   queenOwner=0;
+  }
+ }
+
+ if(!striker.active){
+  scene.remove(striker.mesh);
+ }
+
+ const remaining=pieces.filter(p=>
+  p.active&&p.type!=="queen"
+ );
+
+ if(remaining.length===0){
+  matchOver=true;
+  updateUI();
+  return;
+ }
+
+ if(!turnPocketed||turnFoul){
+  currentPlayer=currentPlayer===1?2:1;
+ }
+
+ setStriker();
+ updateUI();
+
+ if(gameMode==="computer"&&currentPlayer===2){
+  aiBusy=true;
+  setTimeout(computerMove,700);
+ }
+
+ if(onlineRoom&&roomRole==="host"){
+  publishGameState();
+ }
+}
+
+// ======================================
+// 3D MOUSE AND TOUCH CONTROLS
+// ======================================
+
+function getBoardPoint(event){
+
+ const rect=renderer.domElement.getBoundingClientRect();
+
+ pointer.x=((event.clientX-rect.left)/rect.width)*2-1;
+ pointer.y=-((event.clientY-rect.top)/rect.height)*2+1;
+
+ raycaster.setFromCamera(pointer,camera);
+
+ const point=new THREE.Vector3();
+
+ raycaster.ray.intersectPlane(floorPlane,point);
+
+ return point;
+}
+
+function onPointerDown(e){
+
+ if(moving||matchOver||aiBusy)return;
+
+ if(onlineRoom&&!canControlOnline())return;
+
+ const p=getBoardPoint(e);
+
+ if(!p)return;
+
+ const distance=Math.hypot(
+  p.x-striker.x,p.z-striker.z
+ );
+
+ if(distance<.7){
+
+  aiming=true;
+  pointerDown=true;
+  aimPoint=p;
+  renderer.domElement.setPointerCapture(e.pointerId);
+
+ }else if(
+  Math.abs(p.z-striker.z)<.65&&
+  Math.abs(p.x)<2.4
+ ){
+
+  striker.x=p.x;
+  striker.mesh.position.x=p.x;
+ }
+}
+
+function onPointerMove(e){
+
+ if(!aiming||!pointerDown)return;
+
+ aimPoint=getBoardPoint(e);
+}
+
+function onPointerUp(e){
+
+ if(!aiming)return;
+
+ aiming=false;
+ pointerDown=false;
+
+ const end=getBoardPoint(e);
+
+ if(!end)return;
+
+ const dx=striker.x-end.x;
+ const dz=striker.z-end.z;
+ const distance=Math.hypot(dx,dz);
+
+ if(distance>.12){
+  applyShot(dx,dz,distance);
+ }
+}
+
+function applyShot(dx,dz,distance){
+
+ if(moving||matchOver)return;
+
+ if(onlineRoom&&!canControlOnline())return;
+
+ if(onlineRoom&&roomRole==="guest"){
+  sendOnlineShot(dx,dz,distance);
+  return;
+ }
+
+ const len=Math.hypot(dx,dz)||1;
+ const power=Number(document.getElementById("power").value)/100;
+
+ const speed=Math.min(17,Math.max(2.5,distance*2.2))*power;
+
+ striker.vx=dx/len*speed*.035;
+ striker.vz=dz/len*speed*.035;
+
+ moving=true;
+ turnPocketed=false;
+ turnFoul=false;
+ lastTime=0;
+}
+
+function shootButton(){
+
+ if(moving||matchOver||aiBusy)return;
+
+ const dx=0;
+ const dz=currentPlayer===1?-1:1;
+
+ applyShot(dx,dz,3);
+}
+
+function centerStriker(){
+
+ if(moving||matchOver)return;
+
+ striker.x=0;
+ striker.z=currentPlayer===1?3.05:-3.05;
+
+ striker.mesh.position.set(0,.48,striker.z);
+}
+
+function computerMove(){
+
+ if(gameMode!=="computer"||matchOver)return;
+
+ const targets=pieces.filter(p=>
+  p.active&&p.type==="black"
+ );
+
+ if(!targets.length){
+  aiBusy=false;
+  currentPlayer=1;
+  setStriker();
+  updateUI();
+  return;
+ }
+
+ const target=targets[
+  Math.floor(Math.random()*targets.length)
+ ];
+
+ const dx=target.x-striker.x;
+ const dz=target.z-striker.z;
+ const len=Math.hypot(dx,dz)||1;
+
+ striker.vx=dx/len*.22;
+ striker.vz=dz/len*.22;
+
+ aiBusy=false;
+ moving=true;
+ turnPocketed=false;
+ turnFoul=false;
+ lastTime=0;
+}
+
+// ======================================
+// FIREBASE CONNECTION
+// ======================================
+
+const firebaseConfig={
+ apiKey:"AIzaSyBErAQ7NT4eL5hxF8QSOEu5SEPHPyYAIVw",
+ authDomain:"hyper-carrom-vip.firebaseapp.com",
+ databaseURL:"https://hyper-carrom-vip-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId:"hyper-carrom-vip",
+ storageBucket:"hyper-carrom-vip.firebasestorage.app",
+ messagingSenderId:"818597557283",
+ appId:"1:818597557283:web:c7254ee49e6b5464d36d96",
+ measurementId:"G-8ELNZK9FCV"
+};
+
+let auth=null;
+let db=null;
+let currentUser=null;
+let currentRoomCode=null;
+let roomRole=null;
+let roomRef=null;
+let onlineRoom=false;
+let roomListener=null;
+let shotListener=null;
+let lastShotId="";
+
+try{
+
+ if(!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+ }
+
+ auth=firebase.auth();
+ db=firebase.database();
+
+ auth.onAuthStateChanged(user=>{
+  currentUser=user;
+
+  document.getElementById("accountStatus").textContent=
+   user?user.email:"Guest Player";
+
+  document.getElementById("onlineStatus").textContent=
+   user?"Logged in: "+user.email:"Please login first.";
+ });
+
+}catch(e){
+ console.error(e);
+ document.getElementById("onlineStatus").textContent=e.message;
+}
+
+async function signUp(){
+
+ const email=document.getElementById("emailInput").value.trim();
+ const password=document.getElementById("passwordInput").value;
+
+ if(!email||password.length<6){
+  alert("Valid email aur kam az kam 6 character password enter karein.");
+  return;
+ }
+
+ try{
+  await auth.createUserWithEmailAndPassword(email,password);
+  alert("Account created.");
+ }catch(e){
+  alert(e.message);
+ }
+}
+
+async function signIn(){
+
+ const email=document.getElementById("emailInput").value.trim();
+ const password=document.getElementById("passwordInput").value;
+
+ try{
+  await auth.signInWithEmailAndPassword(email,password);
+  alert("Login successful.");
+ }catch(e){
+  alert(e.message);
+ }
+}
+
+async function signOutUser(){
+
+ if(currentRoomCode)await leaveRoom();
+
+ if(auth)await auth.signOut();
+}
+
+function roomPath(code){
+ return db.ref("rooms/"+code);
+}
+
+function randomCode(){
+ return Math.random().toString(36).substring(2,8).toUpperCase();
+}
+
+async function createRoom(){
+
+ if(!currentUser)return alert("Pehle login karein.");
+
+ try{
+
+  const code=randomCode();
+  const ref=roomPath(code);
+
+  await ref.set({
+   host:currentUser.uid,
+   hostName:currentUser.email,
+   guest:null,
+   guestName:null,
+   status:"waiting",
+   gameState:null,
+   shot:null,
+   createdAt:firebase.database.ServerValue.TIMESTAMP
+  });
+
+  currentRoomCode=code;
+  roomRole="host";
+  roomRef=ref;
+  onlineRoom=true;
+
+  document.getElementById("roomInput").value=code;
+  document.getElementById("roomCodeDisplay").textContent="ROOM CODE: "+code;
+
+  startGame("online");
+  onlineRoom=true;
+
+  attachRoomListeners();
+
+  document.getElementById("onlineStatus").textContent=
+   "Room created. Friend ko code bhejein.";
+
+ }catch(e){
+  alert(e.message);
+ }
+}
+
+async function joinRoom(){
+
+ if(!currentUser)return alert("Pehle login karein.");
+
+ const code=document.getElementById("roomInput").value.trim().toUpperCase();
+
+ if(!code)return alert("Room code enter karein.");
+
+ try{
+
+  const ref=roomPath(code);
+  const snap=await ref.once("value");
+
+  if(!snap.exists())return alert("Room nahi mila.");
+
+  const room=snap.val();
+
+  if(room.guest&&room.guest!==currentUser.uid){
+   return alert("Room full hai.");
+  }
+
+  if(room.host===currentUser.uid){
+   return alert("Aap host hain.");
+  }
+
+  await ref.update({
+   guest:currentUser.uid,
+   guestName:currentUser.email,
+   status:"ready"
+  });
+
+  currentRoomCode=code;
+  roomRole="guest";
+  roomRef=ref;
+  onlineRoom=true;
+
+  document.getElementById("roomCodeDisplay").textContent="ROOM CODE: "+code;
+
+  startGame("online");
+  onlineRoom=true;
+
+  attachRoomListeners();
+
+  document.getElementById("onlineStatus").textContent=
+   "Joined room. Waiting for host.";
+
+ }catch(e){
+  alert(e.message);
+ }
+}
+
+function attachRoomListeners(){
+
+ if(!roomRef)return;
+
+ if(roomListener)roomRef.off("value",roomListener);
+ if(shotListener)roomRef.child("shot").off("value",shotListener);
+
+ roomListener=snap=>{
+
+  if(!snap.exists())return;
+
+  const room=snap.val();
+
+  document.getElementById("onlineStatus").textContent=
+   "Room: "+currentRoomCode+
+   " | "+(room.status||"waiting");
+
+  if(roomRole==="guest"&&room.gameState){
+   applyRemoteState(room.gameState);
+  }
+ };
+
+ roomRef.on("value",roomListener);
+
+ shotListener=snap=>{
+
+  if(roomRole!=="host"||!snap.exists())return;
+
+  const shot=snap.val();
+
+  if(!shot||shot.id===lastShotId)return;
+
+  lastShotId=shot.id;
+
+  if(currentPlayer!==2||moving||matchOver)return;
+
+  const len=Math.hypot(shot.dx,shot.dz)||1;
+
+  striker.vx=shot.dx/len*.035*8;
+  striker.vz=shot.dz/len*.035*8;
+
+  moving=true;
+  turnPocketed=false;
+  turnFoul=false;
+  lastTime=0;
+ };
+
+ roomRef.child("shot").on("value",shotListener);
+}
+
+function canControlOnline(){
+
+ if(!onlineRoom)return true;
+
+ return (
+  (roomRole==="host"&&currentPlayer===1)||
+  (roomRole==="guest"&&currentPlayer===2)
+ );
+}
+
+async function sendOnlineShot(dx,dz,distance){
+
+ if(!canControlOnline())return;
+
+ const len=Math.hypot(dx,dz)||1;
+
+ await roomRef.child("shot").set({
+  id:currentUser.uid+"_"+Date.now(),
+  by:currentUser.uid,
+  dx:dx/len,
+  dz:dz/len,
+  distance:distance
+ });
+}
+
+function serializeState(){
+
+ return {
+  currentPlayer,
+  scores,
+  matchOver,
+  queenPending,
+  queenOwner,
+
+  pieces:pieces.map(p=>({
+   x:p.x,z:p.z,vx:p.vx,vz:p.vz,
+   type:p.type,active:p.active
+  })),
+
+  striker:{
+   x:striker.x,z:striker.z,
+   vx:striker.vx,vz:striker.vz,
+   active:striker.active
+  }
+ };
+}
+
+async function publishGameState(){
+
+ if(!roomRef||roomRole!=="host")return;
+
+ try{
+  await roomRef.child("gameState").set(serializeState());
+ }catch(e){
+  console.error(e);
+ }
+}
+
+function applyRemoteState(s){
+
+ if(roomRole!=="guest"||!s)return;
+
+ moving=false;
+ currentPlayer=s.currentPlayer||1;
+ scores=s.scores||[0,0];
+ matchOver=!!s.matchOver;
+ queenPending=!!s.queenPending;
+ queenOwner=s.queenOwner||0;
+
+ // Rebuild the pieces from the host's latest state
+ pieces.forEach(p=>scene.remove(p.mesh));
+ pieces=[];
+
+ (s.pieces||[]).forEach(p=>{
+  const coin=makeCoin(p.x,p.z,p.type);
+  coin.vx=p.vx||0;
+  coin.vz=p.vz||0;
+  coin.active=!!p.active;
+
+  if(!coin.active)scene.remove(coin.mesh);
+
+  pieces.push(coin);
+ });
+
+ if(striker)scene.remove(striker.mesh);
+
+ if(s.striker){
+  striker=makeCoin(
+   s.striker.x,
+   s.striker.z,
+   "striker"
+  );
+
+  striker.vx=s.striker.vx||0;
+  striker.vz=s.striker.vz||0;
+  striker.active=!!s.striker.active;
+
+  if(!striker.active)scene.remove(striker.mesh);
+ }
+
+ updateUI();
+}
+
+async function leaveRoom(){
+
+ if(!roomRef||!currentUser)return;
+
+ try{
+
+  if(roomListener)roomRef.off("value",roomListener);
+  if(shotListener)roomRef.child("shot").off("value",shotListener);
+
+  const snap=await roomRef.once("value");
+
+  if(snap.exists()){
+
+   const room=snap.val();
+
+   if(room.host===currentUser.uid){
+    await roomRef.remove();
+   }else if(room.guest===currentUser.uid){
+    await roomRef.update({
+     guest:null,
+     guestName:null,
+     status:"waiting"
+    });
+   }
+  }
+
+ }catch(e){
+  console.error(e);
+ }
+
+ currentRoomCode=null;
+ roomRole=null;
+ roomRef=null;
+ onlineRoom=false;
+
+ document.getElementById("roomCodeDisplay").textContent="";
+ document.getElementById("onlineStatus").textContent="You left the room.";
+ goHome();
+}
+
+// Host publishes updated board state
+setInterval(()=>{
+ if(onlineRoom&&roomRole==="host"&&roomRef){
+  publishGameState();
+ }
+},300);
+
+document.getElementById("power").addEventListener("input",e=>{
+ document.getElementById("powerText").textContent=e.target.value+"%";
+});
+
+// Initial setup
+init3D();
+
+</script>
+</body>
+</html>
